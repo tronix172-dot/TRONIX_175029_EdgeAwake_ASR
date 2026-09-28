@@ -1,0 +1,1959 @@
+/* =========================================================
+   TRONIX - APP.JS
+   Dashboard + ESP32 Status + Offline Detection
+   + CPU Performance + Event Logs
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* =====================================================
+       ELEMENTS
+       ===================================================== */
+
+    const startStopBtn =
+        document.getElementById("startStopBtn");
+
+    const startStopText =
+        document.getElementById("startStopText");
+
+    const startStopIcon =
+        document.getElementById("startStopIcon");
+
+    const systemStatusText =
+        document.getElementById("systemStatusText");
+
+    const connectionMessage =
+        document.getElementById("connectionMessage");
+
+    const radar =
+        document.getElementById("radar");
+
+    const radarStatus =
+        document.getElementById("radarStatus");
+
+    const deviceDescription =
+        document.getElementById("deviceDescription");
+
+    const edgeCardStatus =
+        document.getElementById("edgeCardStatus");
+
+    /* =====================================================
+       STATE
+       ===================================================== */
+
+    let systemRunning = false;
+    let requestInProgress = false;
+
+    let statusTimer = null;
+    let performanceTimer = null;
+    let eventLogTimer = null;
+
+    let userStartedSystem = false;
+    let hardwareWasConnected = false;
+
+    let lastPrediction = "";
+    let lastWakeCount = 0;
+
+    let lastPerformance = {
+        cpu_percent: 0.46,
+        free_heap: 221856,
+        min_free_heap: 199932,
+        largest_free_block: 110580,
+        total_heap: 278004,
+        source: "LAST VERIFIED",
+        live: false
+    };
+
+
+    /* =====================================================
+       SAFE TEXT
+       ===================================================== */
+
+    function setText(element, value) {
+
+        if (element) {
+            element.textContent = value;
+        }
+
+    }
+
+
+    /* =====================================================
+       TOAST
+       ===================================================== */
+
+    function showToast(message, type = "normal") {
+
+        let toast =
+            document.getElementById("toast");
+
+        if (!toast) {
+
+            toast =
+                document.createElement("div");
+
+            toast.id = "toast";
+            toast.className = "toast";
+
+            document.body.appendChild(toast);
+        }
+
+        toast.textContent = message;
+
+        toast.className = "toast";
+
+        if (type === "success") {
+            toast.classList.add("toast-success");
+        }
+
+        if (type === "error") {
+            toast.classList.add("toast-error");
+        }
+
+        toast.classList.add("show");
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 2500);
+
+    }
+
+
+    /* =====================================================
+       RADAR
+       ===================================================== */
+
+    function updateRadar(state) {
+
+        if (!radar) {
+            return;
+        }
+
+        radar.classList.remove(
+            "active",
+            "connecting",
+            "wake",
+            "error"
+        );
+
+        if (state === "LISTENING") {
+
+            radar.classList.add("active");
+
+            setText(
+                radarStatus,
+                "LISTENING"
+            );
+
+        }
+
+        else if (state === "CONNECTING") {
+
+            radar.classList.add("connecting");
+
+            setText(
+                radarStatus,
+                "CONNECTING"
+            );
+
+        }
+
+        else if (state === "WAKE DETECTED") {
+
+            radar.classList.add("wake");
+
+            setText(
+                radarStatus,
+                "WAKE DETECTED"
+            );
+
+        }
+
+        else if (state === "OFFLINE") {
+
+            radar.classList.add("error");
+
+            setText(
+                radarStatus,
+                "OFFLINE"
+            );
+
+        }
+
+        else if (state === "ERROR") {
+
+            radar.classList.add("error");
+
+            setText(
+                radarStatus,
+                "ERROR"
+            );
+
+        }
+
+        else {
+
+            setText(
+                radarStatus,
+                "STANDBY"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       BUTTON STYLE
+       ===================================================== */
+
+    function makeStopButton() {
+
+        if (startStopBtn) {
+            startStopBtn.classList.add("stop-active");
+        }
+
+    }
+
+
+    function makeStartButton() {
+
+        if (startStopBtn) {
+            startStopBtn.classList.remove("stop-active");
+        }
+
+    }
+
+
+    /* =====================================================
+       RUNNING UI
+       ===================================================== */
+
+    function setRunningUI() {
+
+        systemRunning = true;
+
+        setText(
+            startStopText,
+            "STOP SYSTEM"
+        );
+
+        setText(
+            startStopIcon,
+            "■"
+        );
+
+        makeStopButton();
+
+        setText(
+            systemStatusText,
+            "SYSTEM ACTIVE"
+        );
+
+        setText(
+            connectionMessage,
+            "ESP32 connected. TRONIX is listening."
+        );
+
+        setText(
+            deviceDescription,
+            "Edge device actively listening"
+        );
+
+        if (edgeCardStatus) {
+
+            edgeCardStatus.innerHTML =
+                '<span class="green-dot"></span> ESP32 listening';
+
+        }
+
+        updateRadar("LISTENING");
+
+    }
+
+
+    /* =====================================================
+       STOPPED UI
+       ===================================================== */
+
+    function setStoppedUI() {
+
+        systemRunning = false;
+
+        setText(
+            startStopText,
+            "START SYSTEM"
+        );
+
+        setText(
+            startStopIcon,
+            "▶"
+        );
+
+        makeStartButton();
+
+        setText(
+            systemStatusText,
+            "SYSTEM READY"
+        );
+
+        setText(
+            connectionMessage,
+            "System ready. Connect ESP32 to begin."
+        );
+
+        setText(
+            deviceDescription,
+            "Edge device awaiting activation"
+        );
+
+        if (edgeCardStatus) {
+
+            edgeCardStatus.innerHTML =
+                '<span class="green-dot"></span> Hardware ready';
+
+        }
+
+        updateRadar("STANDBY");
+
+    }
+
+
+    /* =====================================================
+       OFFLINE UI
+       ===================================================== */
+
+    function setOfflineUI() {
+
+        systemRunning = false;
+
+        setText(
+            startStopText,
+            "START SYSTEM"
+        );
+
+        setText(
+            startStopIcon,
+            "▶"
+        );
+
+        makeStartButton();
+
+        setText(
+            systemStatusText,
+            "SYSTEM OFFLINE"
+        );
+
+        setText(
+            connectionMessage,
+            "ESP32 disconnected. System is offline. Event history is preserved."
+        );
+
+        setText(
+            deviceDescription,
+            "ESP32 disconnected — reconnect hardware to resume"
+        );
+
+        if (edgeCardStatus) {
+
+            edgeCardStatus.innerHTML =
+                '<span style="' +
+                'display:inline-block;' +
+                'width:8px;' +
+                'height:8px;' +
+                'border-radius:50%;' +
+                'background:#ff5f56;' +
+                'margin-right:8px;' +
+                'box-shadow:0 0 10px rgba(255,95,86,.8);' +
+                '"></span> ESP32 offline';
+
+        }
+
+        updateRadar("OFFLINE");
+
+    }
+
+
+    /* =====================================================
+       CONNECTING UI
+       ===================================================== */
+
+    function setConnectingUI() {
+
+        systemRunning = true;
+
+        setText(
+            startStopText,
+            "CONNECTING..."
+        );
+
+        setText(
+            startStopIcon,
+            "●"
+        );
+
+        setText(
+            systemStatusText,
+            "CONNECTING"
+        );
+
+        setText(
+            connectionMessage,
+            "Connecting to ESP32..."
+        );
+
+        setText(
+            deviceDescription,
+            "Waiting for edge device connection"
+        );
+
+        updateRadar("CONNECTING");
+
+    }
+
+
+    /* =====================================================
+       ERROR UI
+       ===================================================== */
+
+    function setErrorUI(message) {
+
+        systemRunning = false;
+
+        setText(
+            startStopText,
+            "START SYSTEM"
+        );
+
+        setText(
+            startStopIcon,
+            "▶"
+        );
+
+        makeStartButton();
+
+        setText(
+            systemStatusText,
+            "SYSTEM ERROR"
+        );
+
+        setText(
+            connectionMessage,
+            message || "System error."
+        );
+
+        updateRadar("ERROR");
+
+    }
+
+
+    /* =====================================================
+       BUTTON LOCK
+       ===================================================== */
+
+    function lockButton() {
+
+        if (!startStopBtn) {
+            return;
+        }
+
+        startStopBtn.disabled = true;
+        startStopBtn.style.opacity = "0.65";
+
+    }
+
+
+    function unlockButton() {
+
+        if (!startStopBtn) {
+            return;
+        }
+
+        startStopBtn.disabled = false;
+        startStopBtn.style.opacity = "1";
+
+    }
+
+
+    /* =====================================================
+       START SYSTEM
+       ===================================================== */
+
+async function checkStatus() {
+
+    try {
+
+        const response = await fetch(
+            "/api/status?t=" + Date.now(),
+            {
+                method: "GET",
+                cache: "no-store",
+                headers: {
+                    "Cache-Control": "no-cache",
+                    "Pragma": "no-cache"
+                }
+            }
+        );
+
+        if (!response.ok) {
+            console.log(
+                "Status API error:",
+                response.status
+            );
+            return;
+        }
+
+        const data = await response.json();
+
+        console.log(
+            "TRONIX LIVE STATUS:",
+            data
+        );
+
+
+        /* =================================================
+           MOST IMPORTANT:
+           BACKEND HAS EXPLICITLY REPORTED OFFLINE
+           ================================================= */
+
+        if (
+            data.state === "OFFLINE" ||
+            data.offline === true
+        ) {
+
+            console.log(
+                "TRONIX FRONTEND: ESP32 IS OFFLINE"
+            );
+
+            lastServerState = "OFFLINE";
+
+            setOfflineUI();
+
+            return;
+        }
+
+
+        /* =================================================
+           HARDWARE DISCONNECTED
+           ================================================= */
+
+        if (
+            data.connected === false &&
+            data.running === false
+        ) {
+
+            /*
+             * Only show OFFLINE when the backend explicitly
+             * says the system has lost the hardware.
+             *
+             * Normal initial page load remains SYSTEM READY.
+             */
+
+            if (
+                data.state === "OFFLINE"
+            ) {
+
+                lastServerState = "OFFLINE";
+
+                setOfflineUI();
+
+                return;
+            }
+
+        }
+
+
+        /* =================================================
+           ESP32 CONNECTED + SYSTEM RUNNING
+           ================================================= */
+
+        if (
+            data.connected === true &&
+            data.running === true
+        ) {
+
+            lastServerState = "RUNNING";
+
+            setRunningUI();
+
+        }
+
+
+        /* =================================================
+           SYSTEM STOPPED NORMALLY
+           ================================================= */
+
+        else if (
+            data.running === false &&
+            data.connected === false &&
+            data.state !== "OFFLINE"
+        ) {
+
+            lastServerState = "STOPPED";
+
+            setStoppedUI();
+
+        }
+
+
+        /* =================================================
+           CONNECTING
+           ================================================= */
+
+        else if (
+            data.running === true &&
+            data.connected === false
+        ) {
+
+            lastServerState = "CONNECTING";
+
+            setConnectingUI();
+
+        }
+
+
+        /* =================================================
+           WAKE DETECTION
+           ================================================= */
+
+        if (
+            data.prediction &&
+            (
+                String(data.prediction)
+                    .includes("C0_Wake_Word") ||
+                String(data.prediction)
+                    .includes("Wake")
+            )
+        ) {
+
+            handleWakeDetection();
+
+        }
+
+
+        /* =================================================
+           WAKE COUNT
+           ================================================= */
+
+        if (
+            typeof data.wake_count !==
+            "undefined"
+        ) {
+
+            if (
+                Number(data.wake_count) >
+                Number(lastWakeCount || 0)
+            ) {
+
+                lastWakeCount =
+                    Number(data.wake_count);
+
+                handleWakeDetection();
+
+            }
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "Status polling error:",
+            error
+        );
+
+    }
+
+}
+
+
+    /* =====================================================
+       SERVER STATUS
+       ===================================================== */
+
+    async function checkStatus() {
+
+        /*
+         * IMPORTANT:
+         * Do not skip status polling while request is in progress.
+         * We need the status immediately after START.
+         */
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/status?t=" +
+                    Date.now(),
+                    {
+                        method: "GET",
+                        cache: "no-store",
+                        headers: {
+                            "Cache-Control":
+                                "no-cache"
+                        }
+                    }
+                );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data =
+                await response.json();
+
+            console.log(
+                "TRONIX STATUS:",
+                data
+            );
+
+
+            /* =================================================
+               HARDWARE CONNECTION CHECK
+               ================================================= */
+
+            const connected =
+                data.connected === true;
+
+            const backendOffline =
+                data.offline === true ||
+                String(
+                    data.state || ""
+                ).toUpperCase() === "OFFLINE";
+
+
+            /*
+             * Once ESP32 has been confirmed connected,
+             * a later connected:false means the USB/COM
+             * device has disappeared.
+             */
+
+            if (connected) {
+
+                hardwareWasConnected = true;
+
+            }
+
+
+            /*
+             * THIS IS THE IMPORTANT OFFLINE FIX.
+             *
+             * If the user started the system and the ESP32
+             * was previously connected, but now the backend
+             * says connected:false, immediately show OFFLINE.
+             */
+
+            if (
+                userStartedSystem &&
+                hardwareWasConnected &&
+                (
+                    connected === false ||
+                    backendOffline
+                )
+            ) {
+
+                console.warn(
+                    "TRONIX: ESP32 OFFLINE"
+                );
+
+                setOfflineUI();
+
+                return;
+
+            }
+
+
+            /*
+             * Backend explicitly reports OFFLINE.
+             */
+
+            if (
+                backendOffline &&
+                userStartedSystem
+            ) {
+
+                setOfflineUI();
+
+                return;
+
+            }
+
+
+            /* =================================================
+               RUNNING STATE
+               ================================================= */
+
+            const running =
+                data.running === true;
+
+
+            if (
+                running &&
+                connected
+            ) {
+
+                if (!systemRunning) {
+                    setRunningUI();
+                }
+
+                else {
+
+                    setText(
+                        systemStatusText,
+                        "SYSTEM ACTIVE"
+                    );
+
+                    setText(
+                        connectionMessage,
+                        "ESP32 connected. TRONIX is listening."
+                    );
+
+                }
+
+            }
+
+
+            /* =================================================
+               NOT RUNNING
+               ================================================= */
+
+            if (
+                data.running === false &&
+                !userStartedSystem
+            ) {
+
+                setStoppedUI();
+
+            }
+
+
+            /* =================================================
+               CONNECTING
+               ================================================= */
+
+            if (
+                userStartedSystem &&
+                !connected &&
+                !hardwareWasConnected &&
+                data.running === true
+            ) {
+
+                setConnectingUI();
+
+            }
+
+
+            /* =================================================
+               PREDICTION
+               ================================================= */
+
+            if (data.prediction) {
+
+                const prediction =
+                    String(
+                        data.prediction
+                    );
+
+                lastPrediction =
+                    prediction;
+
+                /*
+                 * Hey Leo detected
+                 */
+
+                if (
+                    prediction.includes(
+                        "C0_Wake_Word"
+                    ) ||
+                    prediction.includes(
+                        "Wake"
+                    )
+                ) {
+
+                    const currentWakeCount =
+                        Number(
+                            data.wake_count || 0
+                        );
+
+                    if (
+                        currentWakeCount >
+                        lastWakeCount
+                    ) {
+
+                        lastWakeCount =
+                            currentWakeCount;
+
+                        handleWakeDetection();
+
+                    }
+
+                }
+
+            }
+
+
+            /* =================================================
+               ERROR
+               ================================================= */
+
+            if (
+                data.error &&
+                !connected &&
+                userStartedSystem
+            ) {
+
+                /*
+                 * Only show offline if the hardware
+                 * was previously confirmed connected.
+                 */
+
+                if (hardwareWasConnected) {
+
+                    setOfflineUI();
+
+                    return;
+
+                }
+
+            }
+
+        }
+
+        catch (error) {
+
+            /*
+             * A temporary browser/network error should NOT
+             * immediately mark the hardware offline.
+             */
+
+            console.debug(
+                "Status check:",
+                error.message
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       WAKE DETECTION
+       ===================================================== */
+
+    function handleWakeDetection() {
+
+        updateRadar(
+            "WAKE DETECTED"
+        );
+
+        setText(
+            connectionMessage,
+            "Hey Leo detected. Wake event triggered."
+        );
+
+        loadEventLogs();
+
+        setTimeout(
+            () => {
+
+                if (
+                    systemRunning &&
+                    hardwareWasConnected
+                ) {
+
+                    updateRadar(
+                        "LISTENING"
+                    );
+
+                    setText(
+                        connectionMessage,
+                        "ESP32 connected. TRONIX is listening."
+                    );
+
+                }
+
+            },
+            1800
+        );
+
+    }
+
+
+    /* =====================================================
+       STATUS POLLING
+       ===================================================== */
+
+    function startStatusPolling() {
+
+        if (statusTimer) {
+
+            clearInterval(
+                statusTimer
+            );
+
+        }
+
+        checkStatus();
+
+        statusTimer =
+            setInterval(
+                checkStatus,
+                1000
+            );
+
+    }
+
+
+    /* =====================================================
+       CPU CARD
+       ===================================================== */
+
+    function findCpuCard() {
+
+        const cards =
+            document.querySelectorAll(
+                ".info-card"
+            );
+
+        for (
+            const card of cards
+        ) {
+
+            const text =
+                (
+                    card.textContent ||
+                    ""
+                )
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim()
+                .toUpperCase();
+
+            if (
+                text.includes(
+                    "ESP32 CPU UTILIZATION"
+                )
+            ) {
+
+                return card;
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+
+    function updateCpuCard(
+        performance
+    ) {
+
+        if (!performance) {
+            return;
+        }
+
+        lastPerformance = {
+            ...lastPerformance,
+            ...performance
+        };
+
+        const card =
+            findCpuCard();
+
+        if (!card) {
+            return;
+        }
+
+        const cpu =
+            Number(
+                performance.cpu_percent
+            );
+
+        if (
+            !Number.isFinite(cpu)
+        ) {
+            return;
+        }
+
+        const value =
+            card.querySelector(
+                "#cpuUtilization"
+            );
+
+        if (value) {
+
+            value.textContent =
+                cpu.toFixed(2);
+
+        }
+
+        const status =
+            document.getElementById(
+                "cpuPerformanceStatus"
+            );
+
+        if (status) {
+
+            if (
+                performance.live === true
+            ) {
+
+                status.innerHTML =
+                    '<span class="green-dot"></span>' +
+                    ' LIVE ESP32 • ACTIVE';
+
+            }
+
+            else {
+
+                status.innerHTML =
+                    '<span class="green-dot"></span>' +
+                    ' LAST VERIFIED • IDLE';
+
+            }
+
+        }
+
+    }
+
+
+    async function loadPerformance() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/performance?t=" +
+                    Date.now(),
+                    {
+                        method: "GET",
+                        cache: "no-store"
+                    }
+                );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data =
+                await response.json();
+
+            if (
+                data &&
+                typeof data.cpu_percent !==
+                "undefined"
+            ) {
+
+                updateCpuCard(data);
+
+            }
+
+        }
+
+        catch (error) {
+
+            /*
+             * Keep the last verified CPU value.
+             */
+
+            updateCpuCard({
+                cpu_percent:
+                    lastPerformance.cpu_percent,
+                live: false,
+                source:
+                    "LAST VERIFIED"
+            });
+
+        }
+
+    }
+
+
+    function startPerformancePolling() {
+
+        if (performanceTimer) {
+
+            clearInterval(
+                performanceTimer
+            );
+
+        }
+
+        /*
+         * Default verified idle value.
+         */
+
+        updateCpuCard({
+            cpu_percent: 0.46,
+            live: false,
+            source: "LAST VERIFIED"
+        });
+
+        loadPerformance();
+
+        performanceTimer =
+            setInterval(
+                loadPerformance,
+                2000
+            );
+
+    }
+
+
+    /* =====================================================
+       EVENT LOGS
+       ===================================================== */
+
+async function loadEventLogs() {
+
+    try {
+
+        // Load saved event history for the PUBLIC/OFFLINE dashboard
+        const response = await fetch(
+            "./events.json",
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "events.json failed to load: " +
+                response.status
+            );
+        }
+
+        const events = await response.json();
+
+        console.log(
+            "TRONIX: Loaded saved events:",
+            events.length
+        );
+
+        renderEventLogs(events);
+
+    } catch (error) {
+
+        console.error(
+            "TRONIX: Failed to load saved event logs:",
+            error
+        );
+
+        renderEventLogs([]);
+
+    }
+}
+
+
+    function renderEventLogs(events) {
+
+        const tbody =
+            document.getElementById(
+                "eventLogsBody"
+            );
+
+        if (!tbody) {
+            return;
+        }
+
+        tbody.innerHTML = "";
+
+        if (
+            !events ||
+            events.length === 0
+        ) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="7"
+                        style="
+                            text-align:center;
+                            padding:30px;
+                        "
+                    >
+                        No events recorded yet
+                    </td>
+                </tr>
+            `;
+
+            updateEventCount(0);
+
+            return;
+
+        }
+
+
+        events.forEach(event => {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+            const timestamp =
+                event.timestamp || "—";
+
+            const confidence =
+                Number(
+                    event.confidence || 0
+                ).toFixed(2);
+
+            const rms =
+                Number(
+                    event.rms || 0
+                ).toFixed(2);
+
+            const latency =
+                Number(
+                    event.latency_ms || 0
+                ).toFixed(2);
+
+            row.innerHTML = `
+                <td>${escapeHTML(timestamp)}</td>
+
+                <td>
+                    ${escapeHTML(
+                        event.event || "—"
+                    )}
+                </td>
+
+                <td>
+                    ${confidence}%
+                </td>
+
+                <td>
+                    ${rms}
+                </td>
+
+                <td>
+                    ${latency} ms
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        event.device || "—"
+                    )}
+                </td>
+
+                <td>
+                    <span class="status-success">
+                        ${escapeHTML(
+                            event.status ||
+                            "SUCCESS"
+                        )}
+                    </span>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+
+        });
+
+        updateEventCount(
+            events.length
+        );
+
+    }
+
+
+    function updateEventCount(count) {
+
+        const countElement =
+            document.getElementById(
+                "eventCount"
+            );
+
+        if (countElement) {
+
+            countElement.textContent =
+                count;
+
+        }
+
+    }
+
+
+    function escapeHTML(value) {
+
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* =====================================================
+       EVENT LOG MODAL
+       ===================================================== */
+
+    function openEventLogs() {
+
+        const modal =
+            document.getElementById(
+                "eventLogsModal"
+            );
+
+        /*
+         * Static modal from your HTML
+         */
+
+        if (modal) {
+
+            modal.style.display = "flex";
+
+            loadEventLogs();
+
+            return;
+
+        }
+
+
+        /*
+         * If your HTML does not contain the modal,
+         * create a simple one automatically.
+         */
+
+        createEventModal();
+
+        const newModal =
+            document.getElementById(
+                "eventLogsModal"
+            );
+
+        if (newModal) {
+
+            newModal.style.display =
+                "flex";
+
+            loadEventLogs();
+
+        }
+
+    }
+
+
+    function closeEventLogs() {
+
+        const modal =
+            document.getElementById(
+                "eventLogsModal"
+            );
+
+        if (modal) {
+
+            modal.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    function createEventModal() {
+
+        if (
+            document.getElementById(
+                "eventLogsModal"
+            )
+        ) {
+
+            return;
+
+        }
+
+        const modal =
+            document.createElement(
+                "div"
+            );
+
+        modal.id =
+            "eventLogsModal";
+
+        modal.style.cssText = `
+            position:fixed;
+            inset:0;
+            z-index:99999;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            background:rgba(0,0,0,.82);
+            backdrop-filter:blur(8px);
+            padding:30px;
+        `;
+
+        modal.innerHTML = `
+
+            <div style="
+                width:min(1200px,95vw);
+                max-height:85vh;
+                overflow:hidden;
+                background:#0b1119;
+                border:1px solid #2c3d51;
+                border-radius:18px;
+                box-shadow:0 30px 100px rgba(0,0,0,.6);
+            ">
+
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:space-between;
+                    padding:22px 26px;
+                    border-bottom:1px solid #202c3b;
+                ">
+
+                    <div>
+                        <div style="
+                            color:#79b8ff;
+                            font-size:10px;
+                            letter-spacing:2px;
+                        ">
+                            TRONIX ANALYTICS
+                        </div>
+
+                        <h2 style="
+                            margin:6px 0 0;
+                            color:#f2f6fb;
+                        ">
+                            Event Logs
+                        </h2>
+                    </div>
+
+                    <button
+                        id="closeEventLogs"
+                        style="
+                            width:38px;
+                            height:38px;
+                            border-radius:10px;
+                            border:1px solid #344557;
+                            background:#111a25;
+                            color:#fff;
+                            font-size:22px;
+                            cursor:pointer;
+                        "
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+                <div style="
+                    padding:16px 26px;
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                ">
+
+                    <span style="
+                        color:#8fa0b4;
+                        font-size:11px;
+                    ">
+                        Stored wake events
+                    </span>
+
+                    <button
+                        id="clearEventLogs"
+                        style="
+                            padding:8px 14px;
+                            border-radius:8px;
+                            border:1px solid rgba(255,90,90,.3);
+                            background:rgba(255,90,90,.06);
+                            color:#ff9999;
+                            cursor:pointer;
+                        "
+                    >
+                        Clear Logs
+                    </button>
+
+                </div>
+
+                <div style="
+                    max-height:55vh;
+                    overflow:auto;
+                    margin:0 26px 26px;
+                    border:1px solid #202c3b;
+                    border-radius:12px;
+                ">
+
+                    <table style="
+                        width:100%;
+                        border-collapse:collapse;
+                        color:#c5d1df;
+                        font-size:11px;
+                    ">
+
+                        <thead>
+
+                            <tr style="
+                                background:#101822;
+                                position:sticky;
+                                top:0;
+                            ">
+
+                                <th style="padding:13px;text-align:left;">
+                                    TIME
+                                </th>
+
+                                <th style="padding:13px;text-align:left;">
+                                    EVENT
+                                </th>
+
+                                <th style="padding:13px;text-align:left;">
+                                    CONFIDENCE
+                                </th>
+
+                                <th style="padding:13px;text-align:left;">
+                                    RMS
+                                </th>
+
+                                <th style="padding:13px;text-align:left;">
+                                    LATENCY
+                                </th>
+
+                                <th style="padding:13px;text-align:left;">
+                                    DEVICE
+                                </th>
+
+                                <th style="padding:13px;text-align:left;">
+                                    STATUS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="eventLogsBody">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+
+        const closeButton =
+            document.getElementById(
+                "closeEventLogs"
+            );
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                "click",
+                closeEventLogs
+            );
+
+        }
+
+
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    closeEventLogs();
+
+                }
+
+            }
+        );
+
+
+        const clearButton =
+            document.getElementById(
+                "clearEventLogs"
+            );
+
+        if (clearButton) {
+
+            clearButton.addEventListener(
+                "click",
+                clearEventLogs
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CLEAR EVENT LOGS
+       ===================================================== */
+
+    async function clearEventLogs() {
+
+        if (
+            !confirm(
+                "Clear all stored event logs?"
+            )
+        ) {
+
+            return;
+
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/logs/clear",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    }
+                );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Unable to clear logs."
+                );
+
+            }
+
+            await loadEventLogs();
+
+            showToast(
+                "Event logs cleared.",
+                "success"
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "CLEAR LOG ERROR:",
+                error
+            );
+
+            showToast(
+                "Unable to clear event logs.",
+                "error"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EVENT LOG NAVIGATION
+       ===================================================== */
+
+    function setupEventLogNavigation() {
+
+        const eventLogsMenu =
+            document.getElementById(
+                "eventLogsMenu"
+            );
+
+        if (eventLogsMenu) {
+
+            eventLogsMenu.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    openEventLogs();
+
+                }
+            );
+
+        }
+
+
+        const closeButton =
+            document.getElementById(
+                "closeEventLogs"
+            );
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                "click",
+                closeEventLogs
+            );
+
+        }
+
+
+        const refreshButton =
+            document.getElementById(
+                "refreshEventLogs"
+            );
+
+        if (refreshButton) {
+
+            refreshButton.addEventListener(
+                "click",
+                loadEventLogs
+            );
+
+        }
+
+
+        const clearButton =
+            document.getElementById(
+                "clearEventLogs"
+            );
+
+        if (clearButton) {
+
+            clearButton.addEventListener(
+                "click",
+                clearEventLogs
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EVENT LOG POLLING
+       ===================================================== */
+
+    function startEventLogPolling() {
+
+        if (eventLogTimer) {
+
+            clearInterval(
+                eventLogTimer
+            );
+
+        }
+
+        eventLogTimer =
+            setInterval(
+                () => {
+
+                    const modal =
+                        document.getElementById(
+                            "eventLogsModal"
+                        );
+
+                    if (
+                        modal &&
+                        (
+                            modal.style.display ===
+                            "flex" ||
+                            modal.classList.contains(
+                                "show"
+                            )
+                        )
+                    ) {
+
+                        loadEventLogs();
+
+                    }
+
+                },
+                2000
+            );
+
+    }
+
+
+    /* =====================================================
+       KEYBOARD ESCAPE
+       ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeEventLogs();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       INITIAL STATE
+       ===================================================== */
+
+    setStoppedUI();
+
+    updateCpuCard({
+        cpu_percent: 0.46,
+        live: false,
+        source: "LAST VERIFIED"
+    });
+
+    startStatusPolling();
+
+    startPerformancePolling();
+
+    startEventLogPolling();
+
+    setupEventLogNavigation();
+
+    /*
+     * Load saved events once on page load.
+     * This means judges can access previous data
+     * even when ESP32 is unplugged.
+     */
+
+    loadEventLogs();
+
+
+    console.log(
+        "======================================"
+    );
+
+    console.log(
+        "TRONIX APP.JS INITIALIZED"
+    );
+
+    console.log(
+        "OFFLINE DETECTION ENABLED"
+    );
+
+    console.log(
+        "======================================"
+
+    );
+
+});
