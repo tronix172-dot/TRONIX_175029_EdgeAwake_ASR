@@ -1,6 +1,19 @@
 # TRONIX Demo
 
-This directory provides access to the online demonstration of the TRONIX edge-based TinyML keyword spotting system.
+The TRONIX online demonstration provides a web dashboard for viewing the deployed edge-based TinyML keyword spotting system.
+
+## Online Dashboard
+
+[**Open TRONIX Website Dashboard →**](https://tronix172-dot.github.io/TRONIX_175029_EdgeAwake_ASR/)
+
+The dashboard presents the edge-device status, TinyML model information, wake-word detection events, and system performance information.
+
+## System
+
+TRONIX uses an ESP32 with an INMP441 digital MEMS microphone. Audio is processed locally using RMS-based voice activity detection, MFCC feature extraction, and an INT8 CNN classifier.
+
+The target wake word is **"Hey Leo"**.
+
 
 ## Online Demo
 
