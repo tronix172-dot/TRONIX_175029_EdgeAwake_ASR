@@ -1,0 +1,6048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TRONIX | Edge AI Security</title>
+
+<style>
+/* =================================================
+   OFFLINE STATE - SOFT RED
+   ================================================= */
+
+.system-pill.offline {
+    border-color: rgba(220, 90, 90, 0.35);
+    background: rgba(120, 35, 35, 0.10);
+    color: #e99a9a;
+    box-shadow: 0 0 18px rgba(180, 60, 60, 0.08);
+}
+
+.system-pill.offline .dot {
+    background: #d98282;
+    box-shadow: 0 0 8px rgba(217, 130, 130, 0.45);
+}
+
+
+/* Offline ESP32 card */
+
+.device-card.offline {
+    border-color: rgba(220, 90, 90, 0.30);
+    background: rgba(100, 30, 30, 0.06);
+}
+
+.device-card.offline .status-dot {
+    background: #d98282;
+    box-shadow: 0 0 8px rgba(217, 130, 130, 0.45);
+}
+
+
+/* Offline radar */
+
+.radar.offline {
+    border-color: rgba(200, 80, 80, 0.25);
+}
+
+.radar.offline::before,
+.radar.offline::after {
+    border-color: rgba(200, 80, 80, 0.18);
+}
+/* =========================================================
+   TRONIX — PREMIUM EDGE AI DASHBOARD
+   ========================================================= */
+
+:root{
+
+    --bg:#070b11;
+    --bg-soft:#0a1018;
+    --panel:#0d151f;
+    --panel-2:#101923;
+
+    --border:#25384e;
+    --border-soft:#1b2a3a;
+
+    --white:#f1f5fa;
+    --text:#d6e0eb;
+    --muted:#7f91a7;
+    --muted-2:#617389;
+
+    --blue:#94baf0;
+    --blue-2:#73a8ed;
+
+    --green:#91e2bc;
+    --green-2:#65dca5;
+
+    --red:#ef6b74;
+    --red-dark:#bc3d49;
+
+    --orange:#e9aa6e;
+
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+
+    margin:0;
+
+    background:
+        radial-gradient(
+            circle at 75% 5%,
+            rgba(83,118,163,.08),
+            transparent 30%
+        ),
+        var(--bg);
+
+    color:var(--text);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    overflow-x:hidden;
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar{
+    width:7px;
+}
+
+::-webkit-scrollbar-track{
+    background:#070b11;
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#273b52;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#38516d;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+
+    position:fixed;
+
+    left:0;
+    top:0;
+
+    width:270px;
+    height:100vh;
+
+    z-index:1000;
+
+    display:flex;
+
+    flex-direction:column;
+
+    padding:22px 13px 14px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #080d14,
+            #090f17
+        );
+
+    border-right:
+        1px solid #1d2b3b;
+
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:
+        0 9px 23px;
+
+    border-bottom:
+        1px solid #1b2837;
+
+    flex-shrink:0;
+
+}
+
+.brand-icon{
+
+    width:57px;
+    height:57px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:
+        1px solid #405875;
+
+    border-radius:16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #111d2a,
+            #0b121b
+        );
+
+    color:#91baf2;
+
+    font-size:31px;
+
+}
+
+.brand-name{
+
+    color:#f1f5fa;
+
+    font-size:27px;
+
+    font-weight:900;
+
+    letter-spacing:2px;
+
+}
+
+.brand-sub{
+
+    margin-top:4px;
+
+    color:#63758b;
+
+    font-size:9px;
+
+    letter-spacing:2.5px;
+
+}
+
+
+/* =========================================================
+   SIDEBAR NAV
+   ========================================================= */
+
+.sidebar-nav{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+    padding:
+        24px 2px 15px;
+
+}
+
+.sidebar-nav::-webkit-scrollbar{
+    width:5px;
+}
+
+.menu-section{
+    margin-bottom:24px;
+}
+
+.menu-title{
+
+    padding:0 16px;
+
+    margin-bottom:8px;
+
+    color:#6d7e93;
+
+    font-size:9px;
+
+    font-weight:900;
+
+    letter-spacing:2px;
+
+}
+
+.menu-item{
+
+    width:100%;
+
+    min-height:48px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:13px;
+
+    padding:0 15px;
+
+    margin:3px 0;
+
+    border-left:3px solid transparent;
+
+    border-radius:11px;
+
+    color:#899aaf;
+
+    cursor:pointer;
+
+    text-decoration:none;
+
+    transition:.18s ease;
+
+}
+
+.menu-item:hover{
+
+    color:#d8e2ed;
+
+    background:#101925;
+
+}
+
+.menu-item.active{
+
+    color:#a8c9f5;
+
+    background:
+        linear-gradient(
+            90deg,
+            #142133,
+            #101923
+        );
+
+    border-left-color:#91baf2;
+
+}
+
+.menu-icon{
+
+    width:21px;
+
+    min-width:21px;
+
+    text-align:center;
+
+    font-size:15px;
+
+}
+
+.menu-text{
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+
+/* =========================================================
+   DEVICE CARD
+   ========================================================= */
+
+.sidebar-device-card{
+
+    flex-shrink:0;
+
+    margin:3px;
+
+    padding:15px;
+
+    border:
+        1px solid #293b50;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101923,
+            #0b121a
+        );
+
+}
+
+.device-status{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:var(--green);
+
+    font-size:9px;
+
+    font-weight:900;
+
+    letter-spacing:1.3px;
+
+}
+
+.dot{
+
+    width:7px;
+    height:7px;
+
+    min-width:7px;
+
+    border-radius:50%;
+
+    background:var(--green);
+
+    box-shadow:
+        0 0 13px
+        rgba(145,226,188,.6);
+
+}
+
+.sidebar-device-name{
+
+    margin-top:10px;
+
+    color:#f0f5fa;
+
+    font-size:21px;
+
+    font-weight:900;
+
+}
+
+.sidebar-device-info{
+
+    margin-top:3px;
+
+    color:#64768b;
+
+    font-size:9px;
+
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main{
+
+    margin-left:270px;
+
+    min-height:100vh;
+
+    padding:
+        0 34px 70px;
+
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar{
+
+    height:76px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    border-bottom:
+        1px solid #1b2938;
+
+}
+
+.breadcrumb{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.breadcrumb-main{
+
+    color:#f1f5fa;
+
+    font-size:14px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+}
+
+.breadcrumb-slash{
+    color:#405168;
+}
+
+.breadcrumb-page{
+
+    color:#73859a;
+
+    font-size:13px;
+
+}
+
+.system-pill{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    padding:9px 15px;
+
+    border:
+        1px solid #294235;
+
+    border-radius:30px;
+
+    background:
+        rgba(18,39,30,.25);
+
+    color:var(--green);
+
+    font-size:9px;
+
+    font-weight:900;
+
+    letter-spacing:1.3px;
+
+}
+
+.system-pill.running{
+
+    color:#f18a91;
+
+    border-color:
+        rgba(239,106,115,.45);
+
+    background:
+        rgba(70,20,27,.2);
+
+}
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.page{
+
+    display:none;
+
+    padding-top:24px;
+
+}
+
+.page.active{
+    display:block;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+
+    position:relative;
+
+    min-height:515px;
+
+    display:grid;
+
+    grid-template-columns:
+        1.05fr .95fr;
+
+    overflow:hidden;
+
+    border:
+        1px solid #27394e;
+
+    border-radius:21px;
+
+    background:
+        radial-gradient(
+            circle at 76% 50%,
+            rgba(75,112,158,.13),
+            transparent 34%
+        ),
+        #0c131c;
+
+}
+
+.hero::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background-image:
+
+        linear-gradient(
+            rgba(122,154,192,.035) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(122,154,192,.035) 1px,
+            transparent 1px
+        );
+
+    background-size:42px 42px;
+
+    pointer-events:none;
+
+}
+
+
+/* =========================================================
+   HERO LEFT
+   ========================================================= */
+
+.hero-left{
+
+    position:relative;
+
+    z-index:2;
+
+    padding:
+        55px 48px;
+
+}
+
+.eyebrow{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    color:#9abff0;
+
+    font-size:10px;
+
+    font-weight:900;
+
+    letter-spacing:1.8px;
+
+}
+
+.hero-title{
+
+    margin:
+        27px 0 0;
+
+    color:#f1f5fa;
+
+    font-size:
+        clamp(48px,4.7vw,69px);
+
+    line-height:.96;
+
+    letter-spacing:-3.4px;
+
+}
+
+.hero-title span{
+
+    display:block;
+
+    color:#8fb9f2;
+
+}
+
+.hero-description{
+
+    max-width:610px;
+
+    margin-top:25px;
+
+    color:#8ca1b8;
+
+    font-size:14px;
+
+    line-height:1.7;
+
+}
+
+.quote{
+
+    margin-top:20px;
+
+    color:#899bad;
+
+    font-size:13px;
+
+    font-style:italic;
+
+}
+
+.quote strong{
+    color:#afd0f4;
+}
+
+
+/* =========================================================
+   START BUTTON
+   ========================================================= */
+
+.start-area{
+    margin-top:27px;
+}
+
+.start-button{
+
+    height:53px;
+
+    min-width:220px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:11px;
+
+    border:
+        1px solid #72a4d2;
+
+    border-radius:10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #96dfbe,
+            #8dc8eb
+        );
+
+    color:#061019;
+
+    font-size:12px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+    cursor:pointer;
+
+    transition:.2s ease;
+
+}
+
+.start-button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 12px 30px
+        rgba(100,163,220,.18);
+
+}
+
+.start-button.running{
+
+    background:
+        linear-gradient(
+            135deg,
+            #e76a73,
+            #bd3c49
+        );
+
+    border-color:#f27c84;
+
+    color:white;
+
+    box-shadow:
+        0 10px 30px
+        rgba(221,67,79,.23);
+
+}
+
+.start-button:disabled{
+    opacity:.7;
+    cursor:wait;
+}
+
+.connection-message{
+
+    margin-top:10px;
+
+    color:#718398;
+
+    font-size:10px;
+
+}
+
+
+/* =========================================================
+   RADAR
+   ========================================================= */
+
+.radar-area{
+
+    position:relative;
+
+    z-index:2;
+
+    min-height:515px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-left:
+        1px solid #27394e;
+
+}
+
+.radar{
+
+    position:relative;
+
+    width:330px;
+    height:330px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    animation:
+        radarFloat 4.2s ease-in-out infinite;
+
+}
+
+@keyframes radarFloat{
+
+    0%,
+    100%{
+        transform:translateY(-8px);
+    }
+
+    50%{
+        transform:translateY(9px);
+    }
+
+}
+
+.ring{
+
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    border:
+        1px solid #29425d;
+
+    border-radius:50%;
+
+}
+
+.ring-1{
+    width:100%;
+    height:100%;
+}
+
+.ring-2{
+    width:80%;
+    height:80%;
+}
+
+.ring-3{
+    width:60%;
+    height:60%;
+}
+
+.ring-4{
+    width:40%;
+    height:40%;
+}
+
+.radar-glow{
+
+    position:absolute;
+
+    width:100%;
+    height:100%;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(113,160,215,.09),
+            transparent 65%
+        );
+
+}
+
+.radar-core{
+
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    width:120px;
+    height:120px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    border:
+        1px solid #405b78;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            #1b2a3d,
+            #080e15 74%
+        );
+
+    box-shadow:
+        0 0 40px
+        rgba(91,139,191,.13);
+
+    z-index:10;
+
+}
+
+.radar-dot{
+
+    width:15px;
+    height:15px;
+
+    margin-bottom:8px;
+
+    border-radius:50%;
+
+    background:#94baf0;
+
+    box-shadow:
+        0 0 19px
+        rgba(148,186,240,.65);
+
+}
+
+.radar-status{
+
+    width:100%;
+
+    padding:0 7px;
+
+    color:#edf3f9;
+
+    font-size:11px;
+
+    font-weight:900;
+
+    letter-spacing:1.3px;
+
+    line-height:1.2;
+
+    text-align:center;
+
+}
+
+.radar-sub{
+
+    margin-top:5px;
+
+    color:#64778c;
+
+    font-size:7px;
+
+    letter-spacing:1.8px;
+
+}
+
+.radar.listening .ring-1{
+    animation:ringPulse 2.6s infinite;
+}
+
+.radar.listening .ring-2{
+    animation:ringPulse 2.6s .4s infinite;
+}
+
+.radar.listening .ring-3{
+    animation:ringPulse 2.6s .8s infinite;
+}
+
+.radar.listening .radar-dot{
+    animation:dotPulse 1.2s infinite;
+}
+
+@keyframes ringPulse{
+
+    0%{
+        opacity:.3;
+
+        transform:
+            translate(-50%,-50%)
+            scale(.95);
+    }
+
+    50%{
+        opacity:1;
+    }
+
+    100%{
+        opacity:.3;
+
+        transform:
+            translate(-50%,-50%)
+            scale(1);
+    }
+
+}
+
+@keyframes dotPulse{
+
+    0%,
+    100%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.35);
+    }
+
+}
+
+.radar.wake .radar-core{
+
+    border-color:
+        rgba(239,106,115,.8);
+
+    box-shadow:
+        0 0 50px
+        rgba(239,106,115,.22);
+
+}
+
+.radar.wake .radar-dot{
+
+    background:#ef8b91;
+
+    box-shadow:
+        0 0 28px
+        rgba(239,106,115,.9);
+
+    animation:
+        wakePulse .7s infinite;
+
+}
+
+.radar.wake .radar-status{
+    color:#ffb0b5;
+}
+
+.radar.wake .ring{
+    border-color:
+        rgba(205,77,87,.4);
+}
+
+@keyframes wakePulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.4);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+
+.edge-ready{
+
+    margin-top:16px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:#718399;
+
+    font-size:9px;
+
+    letter-spacing:1.4px;
+
+}
+
+
+/* =========================================================
+   BIGGER 8 CARDS
+   ========================================================= */
+
+.dashboard-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:14px;
+
+    margin-top:17px;
+
+}
+
+.stat-card{
+
+    min-height:150px;
+
+    padding:21px 20px;
+
+    border:
+        1px solid #293d54;
+
+    border-radius:15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101a25,
+            #0b121a
+        );
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+
+}
+
+.stat-card:hover{
+
+    transform:translateY(-3px);
+
+    border-color:#3e5873;
+
+    box-shadow:
+        0 14px 35px
+        rgba(0,0,0,.18);
+
+}
+
+.stat-top{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+.stat-label{
+
+    color:#71839a;
+
+    font-size:8px;
+
+    font-weight:900;
+
+    letter-spacing:1.4px;
+
+}
+
+.stat-icon{
+
+    width:34px;
+    height:34px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:
+        1px solid #2c425b;
+
+    border-radius:9px;
+
+    background:#111f2d;
+
+    color:#91baf1;
+
+    font-size:14px;
+
+}
+
+.stat-value{
+
+    margin-top:17px;
+
+    color:#edf3f8;
+
+    font-size:25px;
+
+    font-weight:900;
+
+    letter-spacing:-.4px;
+
+}
+
+.stat-value.blue{
+    color:#94baf0;
+}
+
+.stat-value.green{
+    color:#91e2bc;
+}
+
+.stat-description{
+
+    margin-top:7px;
+
+    color:#62758b;
+
+    font-size:9px;
+
+}
+
+
+/* =========================================================
+   CLASSIFIER
+   ========================================================= */
+
+.classifier{
+
+    margin-top:15px;
+
+    padding:22px;
+
+    border:
+        1px solid #293d53;
+
+    border-radius:15px;
+
+    background:#0c141e;
+
+}
+
+.section-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:16px;
+
+}
+
+.section-label{
+
+    color:#708299;
+
+    font-size:8px;
+
+    font-weight:900;
+
+    letter-spacing:1.6px;
+
+}
+
+.section-title{
+
+    margin-top:5px;
+
+    color:#eaf0f6;
+
+    font-size:18px;
+
+    font-weight:850;
+
+}
+
+.section-badge{
+
+    padding:7px 11px;
+
+    border:
+        1px solid #304a65;
+
+    border-radius:20px;
+
+    color:#88b5ed;
+
+    font-size:8px;
+
+    font-weight:900;
+
+}
+
+.class-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:10px;
+
+}
+
+.class-card{
+
+    min-height:92px;
+
+    padding:15px;
+
+    border:
+        1px solid #213349;
+
+    border-radius:11px;
+
+    background:#101923;
+
+}
+
+.class-top{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+.class-code{
+
+    color:#7197c0;
+
+    font-size:8px;
+
+    font-weight:900;
+
+}
+
+.class-symbol{
+
+    color:#91baf2;
+
+    font-size:14px;
+
+}
+
+.class-name{
+
+    margin-top:9px;
+
+    color:#e3eaf2;
+
+    font-size:10px;
+
+    font-weight:800;
+
+}
+
+.class-description{
+
+    margin-top:5px;
+
+    color:#62748a;
+
+    font-size:8px;
+
+}
+
+
+/* =========================================================
+   LOWER DASHBOARD
+   ========================================================= */
+
+.dashboard-lower{
+
+    display:grid;
+
+    grid-template-columns:
+        1.55fr .85fr;
+
+    gap:15px;
+
+    margin-top:15px;
+
+}
+
+.lower-panel{
+
+    min-height:235px;
+
+    padding:21px;
+
+    border:
+        1px solid #293d53;
+
+    border-radius:15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0e1721,
+            #0a1119
+        );
+
+}
+
+.panel-heading{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+.panel-title{
+
+    color:#e6edf5;
+
+    font-size:11px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+}
+
+.panel-subtitle{
+
+    margin-top:4px;
+
+    color:#60738a;
+
+    font-size:8px;
+
+}
+
+.panel-badge{
+
+    padding:6px 10px;
+
+    border:
+        1px solid #2b4964;
+
+    border-radius:8px;
+
+    color:#7fb3e9;
+
+    font-size:7px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+}
+
+
+/* =========================================================
+   PIPELINE
+   ========================================================= */
+
+.pipeline{
+
+    display:flex;
+
+    align-items:center;
+
+    margin-top:28px;
+
+}
+
+.pipeline-node{
+
+    flex:1;
+
+    text-align:center;
+
+}
+
+.pipeline-icon{
+
+    width:52px;
+    height:52px;
+
+    margin:auto;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:
+        1px solid #2c435b;
+
+    border-radius:13px;
+
+    background:#111e2a;
+
+    color:#8db9ef;
+
+    font-size:19px;
+
+}
+
+.pipeline-node h3{
+
+    margin:9px 0 3px;
+
+    color:#dce6ef;
+
+    font-size:9px;
+
+}
+
+.pipeline-node p{
+
+    margin:0;
+
+    color:#5f7288;
+
+    font-size:7px;
+
+}
+
+.pipeline-line{
+
+    width:38px;
+
+    height:1px;
+
+    flex-shrink:0;
+
+    background:#30465c;
+
+}
+
+
+/* =========================================================
+   PRIVACY ENGINE — OLD STYLE RESTORED + BIGGER
+   ========================================================= */
+
+.privacy-highlight{
+
+    margin-top:22px;
+
+    padding:16px;
+
+    border:
+        1px solid #203a32;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #101d20,
+            #0d171d
+        );
+
+}
+
+.privacy-head{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    color:#8ce0b8;
+
+    font-size:10px;
+
+    font-weight:900;
+
+    letter-spacing:1.1px;
+
+}
+
+.privacy-description{
+
+    margin-top:6px;
+
+    color:#607488;
+
+    font-size:8px;
+
+}
+
+.privacy-rows{
+
+    margin-top:15px;
+
+}
+
+.privacy-row{
+
+    min-height:43px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 3px;
+
+    border-bottom:
+        1px solid #1b2936;
+
+    color:#728398;
+
+    font-size:9px;
+
+}
+
+.privacy-row:last-child{
+    border-bottom:none;
+}
+
+.privacy-row strong{
+
+    color:#80c9ed;
+
+    font-size:8px;
+
+    letter-spacing:.7px;
+
+}
+
+.privacy-row strong.green{
+    color:#8ce0b8;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.dashboard-footer{
+
+    margin-top:15px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:
+        14px 17px;
+
+    border:
+        1px solid #1d2d3f;
+
+    border-radius:11px;
+
+    background:#091019;
+
+}
+
+.footer-left{
+
+    color:#566a80;
+
+    font-size:8px;
+
+}
+
+.footer-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    color:#718398;
+
+    font-size:8px;
+
+}
+
+
+/* =========================================================
+   INNER PAGES
+   ========================================================= */
+
+.inner-page{
+
+    min-height:720px;
+
+    padding:29px;
+
+    border:
+        1px solid #27394d;
+
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0d151f,
+            #0a1119
+        );
+
+}
+
+.inner-eyebrow{
+
+    color:#8db7eb;
+
+    font-size:9px;
+
+    font-weight:900;
+
+    letter-spacing:1.7px;
+
+}
+
+.inner-title{
+
+    margin:
+        8px 0 6px;
+
+    color:#edf3f9;
+
+    font-size:34px;
+
+    font-weight:900;
+
+}
+
+.inner-description{
+
+    max-width:800px;
+
+    margin:0;
+
+    color:#7f92a8;
+
+    font-size:12px;
+
+    line-height:1.7;
+
+}
+
+
+/* =========================================================
+   METRIC GRID
+   ========================================================= */
+
+.metric-banner{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:13px;
+
+    margin-top:27px;
+
+}
+
+.metric{
+
+    min-height:135px;
+
+    padding:19px;
+
+    border:
+        1px solid #293f56;
+
+    border-radius:13px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #111c27,
+            #0d151e
+        );
+
+}
+
+.metric-label{
+
+    color:#6e8196;
+
+    font-size:8px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+}
+
+.metric-value{
+
+    margin-top:12px;
+
+    color:#eef4fa;
+
+    font-size:25px;
+
+    font-weight:900;
+
+}
+
+.metric-note{
+
+    margin-top:6px;
+
+    color:#5f7389;
+
+    font-size:8px;
+
+}
+
+
+/* =========================================================
+   PAGE CARDS
+   ========================================================= */
+
+.page-stat-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:14px;
+
+    margin-top:25px;
+
+}
+
+.page-stat{
+
+    min-height:170px;
+
+    padding:20px;
+
+    border:
+        1px solid #293f56;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101923,
+            #0c141d
+        );
+
+    transition:.2s ease;
+
+}
+
+.page-stat:hover{
+
+    transform:translateY(-3px);
+
+    border-color:#405973;
+
+}
+
+.page-stat-icon{
+
+    width:48px;
+    height:48px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:
+        1px solid #304965;
+
+    border-radius:12px;
+
+    background:#132233;
+
+    color:#91baf1;
+
+    font-size:19px;
+
+}
+
+.page-stat h3{
+
+    margin:
+        14px 0 6px;
+
+    color:#e7eef6;
+
+    font-size:15px;
+
+}
+
+.page-stat p{
+
+    margin:0;
+
+    color:#687b91;
+
+    font-size:9px;
+
+    line-height:1.65;
+
+}
+
+
+/* =========================================================
+   EVENT LOG
+   ========================================================= */
+
+.event-toolbar{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-top:24px;
+
+}
+
+.event-count{
+
+    color:#8193a8;
+
+    font-size:10px;
+
+}
+
+.event-actions{
+
+    display:flex;
+
+    gap:8px;
+
+}
+
+.action-button{
+
+    padding:9px 13px;
+
+    border:
+        1px solid #2e445d;
+
+    border-radius:8px;
+
+    background:#101a25;
+
+    color:#8eb8ed;
+
+    font-size:9px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+}
+
+.action-button:hover{
+    background:#152333;
+}
+
+.action-button.danger{
+
+    color:#e9939a;
+
+    border-color:#51343a;
+
+}
+
+.table-wrap{
+
+    margin-top:13px;
+
+    max-height:500px;
+
+    overflow:auto;
+
+    border:
+        1px solid #24364a;
+
+    border-radius:12px;
+
+}
+
+.event-table{
+
+    width:100%;
+
+    min-width:900px;
+
+    border-collapse:collapse;
+
+}
+
+.event-table th{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:2;
+
+    padding:13px;
+
+    background:#111c27;
+
+    color:#6e8197;
+
+    font-size:8px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+    text-align:left;
+
+}
+
+.event-table td{
+
+    padding:13px;
+
+    border-top:
+        1px solid #1d2a39;
+
+    color:#bdc9d6;
+
+    font-size:9px;
+
+}
+
+.event-table tbody tr{
+
+    transition:.15s ease;
+
+}
+
+.event-table tbody tr:hover{
+    background:#111c27;
+}
+
+
+/* LATEST EVENT */
+
+.event-table tbody tr.latest-event{
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(60,105,150,.13),
+            rgba(30,53,75,.04)
+        );
+
+}
+
+.event-table tbody tr.latest-event td:first-child{
+
+    border-left:
+        2px solid #91baf0;
+
+}
+
+.latest-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    margin-left:6px;
+
+    padding:3px 6px;
+
+    border-radius:20px;
+
+    background:#172b40;
+
+    color:#91baf0;
+
+    font-size:6px;
+
+    font-weight:900;
+
+    letter-spacing:.7px;
+
+}
+
+.event-status{
+
+    display:inline-block;
+
+    padding:4px 8px;
+
+    border-radius:20px;
+
+    background:#102c22;
+
+    color:#83dfae;
+
+    font-size:8px;
+
+    font-weight:900;
+
+}
+
+
+/* =========================================================
+   INFO BOX
+   ========================================================= */
+
+.info-box{
+
+    margin-top:24px;
+
+    padding:4px 18px;
+
+    border:
+        1px solid #24364a;
+
+    border-radius:13px;
+
+    background:#101923;
+
+}
+
+.info-row{
+
+    min-height:53px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    border-bottom:
+        1px solid #1e2c3a;
+
+}
+
+.info-row:last-child{
+    border-bottom:none;
+}
+
+.info-row span{
+
+    color:#718398;
+
+    font-size:10px;
+
+}
+
+.info-row strong{
+
+    color:#dce5ef;
+
+    font-size:10px;
+
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast{
+
+    position:fixed;
+
+    right:24px;
+
+    bottom:24px;
+
+    z-index:5000;
+
+    max-width:380px;
+
+    padding:13px 16px;
+
+    border:
+        1px solid #30455d;
+
+    border-radius:10px;
+
+    background:#111b27;
+
+    color:#dce6f0;
+
+    font-size:10px;
+
+    box-shadow:
+        0 15px 50px
+        rgba(0,0,0,.45);
+
+    opacity:0;
+
+    transform:translateY(10px);
+
+    pointer-events:none;
+
+    transition:.2s ease;
+
+}
+
+.toast.show{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+}
+/* =================================================
+   OFFLINE STATE - SOFT RED
+   ================================================= */
+
+.system-pill.offline {
+    border-color: rgba(220, 90, 90, 0.35);
+    background: rgba(120, 35, 35, 0.10);
+    color: #e99a9a;
+    box-shadow: 0 0 18px rgba(180, 60, 60, 0.08);
+}
+
+.system-pill.offline .dot {
+    background: #d98282;
+    box-shadow: 0 0 8px rgba(217, 130, 130, 0.45);
+}
+
+
+/* Offline ESP32 card */
+
+.device-card.offline {
+    border-color: rgba(220, 90, 90, 0.30);
+    background: rgba(100, 30, 30, 0.06);
+}
+
+.device-card.offline .status-dot {
+    background: #d98282;
+    box-shadow: 0 0 8px rgba(217, 130, 130, 0.45);
+}
+
+
+/* Offline radar */
+
+.radar.offline {
+    border-color: rgba(200, 80, 80, 0.25);
+}
+
+.radar.offline::before,
+.radar.offline::after {
+    border-color: rgba(200, 80, 80, 0.18);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1250px){
+
+    .sidebar{
+        width:245px;
+    }
+
+    .main{
+        margin-left:245px;
+    }
+
+    .hero{
+        grid-template-columns:1fr;
+    }
+
+    .radar-area{
+
+        min-height:360px;
+
+        border-left:none;
+
+        border-top:
+            1px solid #27394e;
+
+    }
+
+    .dashboard-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .dashboard-lower{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        width:215px;
+    }
+
+    .main{
+        margin-left:215px;
+
+        padding-left:18px;
+        padding-right:18px;
+    }
+
+    .page-stat-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .metric-banner{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:650px){
+
+    .dashboard-grid,
+    .class-grid,
+    .page-stat-grid,
+    .metric-banner{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+
+<aside class="sidebar">
+
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            ◇
+        </div>
+
+        <div>
+
+            <div class="brand-name">
+                TRONIX
+            </div>
+
+            <div class="brand-sub">
+                EDGE AI SECURITY
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <nav class="sidebar-nav">
+
+
+        <div class="menu-section">
+
+            <div class="menu-title">
+                CONTROL
+            </div>
+
+            <a
+                href="#"
+                class="menu-item active"
+                data-page="dashboard">
+
+                <span class="menu-icon">⌂</span>
+
+                <span class="menu-text">
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="menu-item"
+                data-page="live">
+
+                <span class="menu-icon">◉</span>
+
+                <span class="menu-text">
+                    Live Detection
+                </span>
+
+            </a>
+
+        </div>
+
+
+        <div class="menu-section">
+
+            <div class="menu-title">
+                ANALYTICS
+            </div>
+
+            <a
+                href="#"
+                class="menu-item"
+                data-page="events">
+
+                <span class="menu-icon">◷</span>
+
+                <span class="menu-text">
+                    Event Logs
+                </span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="menu-item"
+                data-page="performance">
+
+                <span class="menu-icon">⌁</span>
+
+                <span class="menu-text">
+                    Performance
+                </span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="menu-item"
+                data-page="model">
+
+                <span class="menu-icon">◆</span>
+
+                <span class="menu-text">
+                    ML Model
+                </span>
+
+            </a>
+
+        </div>
+
+
+        <div class="menu-section">
+
+            <div class="menu-title">
+                SYSTEM
+            </div>
+
+            <a
+                href="#"
+                class="menu-item"
+                data-page="architecture">
+
+                <span class="menu-icon">◇</span>
+
+                <span class="menu-text">
+                    Architecture
+                </span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="menu-item"
+                data-page="compliance">
+
+                <span class="menu-icon">✓</span>
+
+                <span class="menu-text">
+                    Compliance
+                </span>
+
+            </a>
+
+
+            <a
+                href="#"
+                class="menu-item"
+                data-page="privacy">
+
+                <span class="menu-icon">◈</span>
+
+                <span class="menu-text">
+                    Privacy &amp; Security
+                </span>
+
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="sidebar-device-card">
+
+        <div class="device-status">
+
+            <span class="dot"></span>
+
+            <span id="sidebarStatus">
+                SYSTEM READY
+            </span>
+
+        </div>
+
+        <div class="sidebar-device-name">
+            ESP32
+        </div>
+
+        <div
+            class="sidebar-device-info"
+            id="sidebarDescription">
+
+            Edge device awaiting activation
+
+        </div>
+
+    </div>
+
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+     ========================================================= -->
+
+<main class="main">
+
+
+<header class="topbar">
+
+
+    <div class="breadcrumb">
+
+        <span class="breadcrumb-main">
+            TRONIX
+        </span>
+
+        <span class="breadcrumb-slash">
+            /
+        </span>
+
+        <span
+            class="breadcrumb-page"
+            id="breadcrumbPage">
+
+            Dashboard
+
+        </span>
+
+    </div>
+
+
+    <div
+        class="system-pill"
+        id="systemPill">
+
+        <span class="dot"></span>
+
+        <span id="systemPillText">
+            SYSTEM READY
+        </span>
+
+    </div>
+
+
+</header>
+
+
+<!-- =========================================================
+     DASHBOARD
+     ========================================================= -->
+
+<section
+    class="page active"
+    id="page-dashboard">
+
+
+<div class="hero">
+
+
+    <div class="hero-left">
+
+
+        <div class="eyebrow">
+
+            <span class="dot"></span>
+
+            EDGE INTELLIGENCE PLATFORM
+
+        </div>
+
+
+        <h1 class="hero-title">
+
+            Voice intelligence,
+
+            <span>
+                at the edge.
+            </span>
+
+        </h1>
+
+
+        <p class="hero-description">
+
+            A privacy-first voice security system
+            that detects custom wake words locally
+            using TinyML before communicating with
+            the cloud.
+
+        </p>
+
+
+        <div class="quote">
+
+            “ Hear locally. Decide locally.
+            <strong>
+                Stream only when needed.
+            </strong> ”
+
+        </div>
+
+
+        <div class="start-area">
+
+
+            <button
+                class="start-button"
+                id="startStopBtn">
+
+                <span id="startIcon">
+                    ▶
+                </span>
+
+                <span id="startText">
+                    START SYSTEM
+                </span>
+
+            </button>
+
+
+            <div
+                class="connection-message"
+                id="connectionMessage">
+
+                System ready. Connect ESP32 to begin.
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <div class="radar-area">
+
+
+        <div
+            class="radar"
+            id="radar">
+
+
+            <div class="radar-glow"></div>
+
+            <div class="ring ring-1"></div>
+
+            <div class="ring ring-2"></div>
+
+            <div class="ring ring-3"></div>
+
+            <div class="ring ring-4"></div>
+
+
+            <div class="radar-core">
+
+
+                <div
+                    class="radar-dot">
+                </div>
+
+
+                <div
+                    class="radar-status"
+                    id="radarStatus">
+
+                    STANDBY
+
+                </div>
+
+
+                <div class="radar-sub">
+                    LOCAL KWS
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <div class="edge-ready">
+
+            <span class="dot"></span>
+
+            EDGE DEVICE READY
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     BIG 8 CARDS
+     ========================================================= -->
+
+<div class="dashboard-grid">
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                ESP32 CPU UTILIZATION
+            </div>
+
+            <div class="stat-icon">
+                ⚡
+            </div>
+
+        </div>
+
+        <div class="stat-value">
+            0.46%
+        </div>
+
+        <div class="stat-description">
+            Last verified • idle listening
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                EDGE DEVICE
+            </div>
+
+            <div class="stat-icon">
+                ◇
+            </div>
+
+        </div>
+
+        <div class="stat-value">
+            ESP32
+        </div>
+
+        <div class="stat-description">
+            Hardware ready
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                TINYML MODEL
+            </div>
+
+            <div class="stat-icon">
+                ◆
+            </div>
+
+        </div>
+
+        <div class="stat-value blue">
+            INT8
+        </div>
+
+        <div class="stat-description">
+            34.39 KB • Quantized
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                CUSTOM KEYWORD
+            </div>
+
+            <div class="stat-icon">
+                ♫
+            </div>
+
+        </div>
+
+        <div class="stat-value blue">
+            “Hey Leo”
+        </div>
+
+        <div class="stat-description">
+            4-class classifier
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                CLOUD
+            </div>
+
+            <div class="stat-icon">
+                ☁
+            </div>
+
+        </div>
+
+        <div class="stat-value">
+            EVENT ONLY
+        </div>
+
+        <div class="stat-description">
+            Wake-triggered
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                MODEL SIZE
+            </div>
+
+            <div class="stat-icon">
+                ▣
+            </div>
+
+        </div>
+
+        <div class="stat-value">
+            34.39 KB
+        </div>
+
+        <div class="stat-description">
+            INT8 TFLite
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                INPUT FEATURES
+            </div>
+
+            <div class="stat-icon">
+                ▦
+            </div>
+
+        </div>
+
+        <div class="stat-value">
+            13 × 94
+        </div>
+
+        <div class="stat-description">
+            MFCC representation
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-label">
+                SAMPLE RATE
+            </div>
+
+            <div class="stat-icon">
+                ≋
+            </div>
+
+        </div>
+
+        <div class="stat-value">
+            16 kHz
+        </div>
+
+        <div class="stat-description">
+            Mono PCM audio
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     CLASSIFIER
+     ========================================================= -->
+
+<div class="classifier">
+
+
+    <div class="section-header">
+
+        <div>
+
+            <div class="section-label">
+                TINYML CLASSIFICATION SPACE
+            </div>
+
+            <div class="section-title">
+                4-Class Voice Classifier
+            </div>
+
+        </div>
+
+        <div class="section-badge">
+            INT8 • 4 CLASS
+        </div>
+
+    </div>
+
+
+    <div class="class-grid">
+
+
+        <div class="class-card">
+
+            <div class="class-top">
+
+                <span class="class-code">
+                    C0
+                </span>
+
+                <span class="class-symbol">
+                    ◉
+                </span>
+
+            </div>
+
+            <div class="class-name">
+                HEY LEO
+            </div>
+
+            <div class="class-description">
+                Wake Word
+            </div>
+
+        </div>
+
+
+        <div class="class-card">
+
+            <div class="class-top">
+
+                <span class="class-code">
+                    C1
+                </span>
+
+                <span class="class-symbol">
+                    ≋
+                </span>
+
+            </div>
+
+            <div class="class-name">
+                OTHER SPEECH
+            </div>
+
+            <div class="class-description">
+                Normal speech
+            </div>
+
+        </div>
+
+
+        <div class="class-card">
+
+            <div class="class-top">
+
+                <span class="class-code">
+                    C2
+                </span>
+
+                <span class="class-symbol">
+                    ≈
+                </span>
+
+            </div>
+
+            <div class="class-name">
+                SIMILAR WORDS
+            </div>
+
+            <div class="class-description">
+                Similar phrases
+            </div>
+
+        </div>
+
+
+        <div class="class-card">
+
+            <div class="class-top">
+
+                <span class="class-code">
+                    C3
+                </span>
+
+                <span class="class-symbol">
+                    ◌
+                </span>
+
+            </div>
+
+            <div class="class-name">
+                BACKGROUND NOISE
+            </div>
+
+            <div class="class-description">
+                Silence / environment
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     PIPELINE + PRIVACY
+     ========================================================= -->
+
+<div class="dashboard-lower">
+
+
+    <div class="lower-panel">
+
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="panel-title">
+                    EDGE INTELLIGENCE PIPELINE
+                </div>
+
+                <div class="panel-subtitle">
+                    Local processing before cloud communication
+                </div>
+
+            </div>
+
+            <div class="panel-badge">
+                LOCAL
+            </div>
+
+        </div>
+
+
+        <div class="pipeline">
+
+
+            <div class="pipeline-node">
+
+                <div class="pipeline-icon">
+                    🎙
+                </div>
+
+                <h3>
+                    INMP441
+                </h3>
+
+                <p>
+                    Audio capture
+                </p>
+
+            </div>
+
+
+            <div class="pipeline-line"></div>
+
+
+            <div class="pipeline-node">
+
+                <div class="pipeline-icon">
+                    ⚡
+                </div>
+
+                <h3>
+                    ESP32
+                </h3>
+
+                <p>
+                    Edge processing
+                </p>
+
+            </div>
+
+
+            <div class="pipeline-line"></div>
+
+
+            <div class="pipeline-node">
+
+                <div class="pipeline-icon">
+                    ◆
+                </div>
+
+                <h3>
+                    TinyML
+                </h3>
+
+                <p>
+                    Wake detection
+                </p>
+
+            </div>
+
+
+            <div class="pipeline-line"></div>
+
+
+            <div class="pipeline-node">
+
+                <div class="pipeline-icon">
+                    ☁
+                </div>
+
+                <h3>
+                    CLOUD
+                </h3>
+
+                <p>
+                    Event logging
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- OLD PRIVACY ENGINE STYLE -->
+
+    <div class="lower-panel">
+
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="panel-title">
+                    PRIVACY ENGINE
+                </div>
+
+                <div class="panel-subtitle">
+                    Audio processing policy
+                </div>
+
+            </div>
+
+            <div class="panel-badge">
+                ◇
+            </div>
+
+        </div>
+
+
+        <div class="privacy-highlight">
+
+            <div class="privacy-head">
+
+                <span class="dot"></span>
+
+                LOCAL FIRST
+
+            </div>
+
+            <div class="privacy-description">
+
+                Voice classification happens at the edge.
+
+            </div>
+
+        </div>
+
+
+        <div class="privacy-rows">
+
+
+            <div class="privacy-row">
+
+                <span>
+                    CONTINUOUS AUDIO
+                </span>
+
+                <strong>
+                    LOCAL
+                </strong>
+
+            </div>
+
+
+            <div class="privacy-row">
+
+                <span>
+                    WAKE EVENT
+                </span>
+
+                <strong>
+                    CLOUD
+                </strong>
+
+            </div>
+
+
+            <div class="privacy-row">
+
+                <span>
+                    RAW AUDIO
+                </span>
+
+                <strong class="green">
+                    NOT REQUIRED
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<div class="dashboard-footer">
+
+    <div class="footer-left">
+        TRONIX • Edge AI Voice Security • PS26172
+    </div>
+
+    <div class="footer-right">
+
+        <span class="dot"></span>
+
+        System ready
+
+    </div>
+
+</div>
+
+
+</section>
+
+
+<!-- =========================================================
+     LIVE DETECTION
+     ========================================================= -->
+
+<section
+    class="page"
+    id="page-live">
+
+<div class="inner-page">
+
+    <div class="inner-eyebrow">
+        REAL-TIME EDGE MONITOR
+    </div>
+
+    <div class="inner-title">
+        Live Detection
+    </div>
+
+    <p class="inner-description">
+        Real-time classification and device state
+        reported by the TRONIX backend.
+    </p>
+
+
+    <div class="metric-banner">
+
+        <div class="metric">
+
+            <div class="metric-label">
+                SYSTEM STATE
+            </div>
+
+            <div
+                class="metric-value"
+                id="liveState">
+                STANDBY
+            </div>
+
+            <div class="metric-note">
+                Current backend state
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                CLASSIFICATION
+            </div>
+
+            <div
+                class="metric-value"
+                id="livePrediction">
+                —
+            </div>
+
+            <div class="metric-note">
+                Current prediction
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                CONFIDENCE
+            </div>
+
+            <div
+                class="metric-value"
+                id="liveConfidence">
+                0%
+            </div>
+
+            <div class="metric-note">
+                Current inference
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                WAKE COUNT
+            </div>
+
+            <div
+                class="metric-value"
+                id="liveWakeCount">
+                0
+            </div>
+
+            <div class="metric-note">
+                Recorded detections
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="page-stat-grid">
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ≋
+            </div>
+
+            <h3>
+                RMS Level
+            </h3>
+
+            <p id="liveRms">
+                0
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ⚡
+            </div>
+
+            <h3>
+                Inference Latency
+            </h3>
+
+            <p id="liveLatency">
+                0 ms
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ◉
+            </div>
+
+            <h3>
+                Edge Device
+            </h3>
+
+            <p>
+                ESP32 + INMP441
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     EVENT LOGS
+     ========================================================= -->
+
+<section
+    class="page"
+    id="page-events">
+
+<div class="inner-page">
+
+    <div class="inner-eyebrow">
+        DETECTION HISTORY
+    </div>
+
+    <div class="inner-title">
+        Event Logs
+    </div>
+
+    <p class="inner-description">
+        Wake-word events recorded by TRONIX.
+        <strong style="color:#91baf0;">
+            Latest detection appears first.
+        </strong>
+    </p>
+
+
+    <div class="event-toolbar">
+
+        <div
+            class="event-count"
+            id="eventCount">
+
+            Loading events...
+
+        </div>
+
+
+        <div class="event-actions">
+
+            <button
+                class="action-button"
+                id="refreshEvents">
+
+                ↻ Refresh
+
+            </button>
+
+
+            <button
+                class="action-button danger"
+                id="clearEvents">
+
+                Clear Logs
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table class="event-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>TIME</th>
+                    <th>EVENT</th>
+                    <th>CONFIDENCE</th>
+                    <th>RMS</th>
+                    <th>LATENCY</th>
+                    <th>DEVICE</th>
+                    <th>MODEL</th>
+                    <th>STATUS</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="eventBody">
+
+                <tr>
+
+                    <td colspan="8">
+                        Loading event history...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     PERFORMANCE
+     ========================================================= -->
+
+<section
+    class="page"
+    id="page-performance">
+
+<div class="inner-page">
+
+    <div class="inner-eyebrow">
+        EDGE PERFORMANCE
+    </div>
+
+    <div class="inner-title">
+        Performance
+    </div>
+
+    <p class="inner-description">
+        Verified performance information for
+        the current TRONIX implementation.
+    </p>
+
+
+    <div class="metric-banner">
+
+        <div class="metric">
+
+            <div class="metric-label">
+                CPU UTILIZATION
+            </div>
+
+            <div class="metric-value">
+                0.46%
+            </div>
+
+            <div class="metric-note">
+                Last verified idle listening measurement
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                MODEL SIZE
+            </div>
+
+            <div class="metric-value">
+                34.39 KB
+            </div>
+
+            <div class="metric-note">
+                INT8 model
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                FEATURE SHAPE
+            </div>
+
+            <div class="metric-value">
+                13 × 94
+            </div>
+
+            <div class="metric-note">
+                MFCC
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                SAMPLE RATE
+            </div>
+
+            <div class="metric-value">
+                16 kHz
+            </div>
+
+            <div class="metric-note">
+                Mono PCM
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="page-stat-grid">
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ⚡
+            </div>
+
+            <h3>
+                CPU Utilization
+            </h3>
+
+            <p>
+                0.46% — last verified idle
+                listening measurement.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ▣
+            </div>
+
+            <h3>
+                Model Footprint
+            </h3>
+
+            <p>
+                34.39 KB INT8 TFLite model
+                for the deployment candidate.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ▦
+            </div>
+
+            <h3>
+                MFCC Features
+            </h3>
+
+            <p>
+                13 coefficients × 94 time frames.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ◉
+            </div>
+
+            <h3>
+                Wake Word
+            </h3>
+
+            <p>
+                Custom keyword:
+                “Hey Leo”.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                4
+            </div>
+
+            <h3>
+                Classes
+            </h3>
+
+            <p>
+                Wake word, other speech,
+                similar words and background noise.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ✓
+            </div>
+
+            <h3>
+                Edge Deployment
+            </h3>
+
+            <p>
+                Lightweight TinyML architecture
+                targeted for ESP32.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     ML MODEL
+     ========================================================= -->
+
+<section
+    class="page"
+    id="page-model">
+
+<div class="inner-page">
+
+    <div class="inner-eyebrow">
+        TINYML INTELLIGENCE
+    </div>
+
+    <div class="inner-title">
+        ML Model
+    </div>
+
+    <p class="inner-description">
+        Compact INT8 CNN designed for
+        speaker-independent edge voice classification.
+    </p>
+
+
+    <div class="metric-banner">
+
+        <div class="metric">
+
+            <div class="metric-label">
+                MODEL
+            </div>
+
+            <div class="metric-value">
+                CNN
+            </div>
+
+            <div class="metric-note">
+                94-frame architecture
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                QUANTIZATION
+            </div>
+
+            <div class="metric-value">
+                INT8
+            </div>
+
+            <div class="metric-note">
+                TFLite deployment
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                INPUT
+            </div>
+
+            <div class="metric-value">
+                13 × 94
+            </div>
+
+            <div class="metric-note">
+                MFCC tensor
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                TEST ACCURACY
+            </div>
+
+            <div class="metric-value">
+                87.22%
+            </div>
+
+            <div class="metric-note">
+                Speaker-independent test
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="page-stat-grid">
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ◈
+            </div>
+
+            <h3>
+                MFCC Input
+            </h3>
+
+            <p>
+                13 MFCC coefficients across
+                94 time frames.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                24
+            </div>
+
+            <h3>
+                Conv Layer 1
+            </h3>
+
+            <p>
+                Initial acoustic feature extraction
+                followed by normalization and pooling.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                32
+            </div>
+
+            <h3>
+                Conv Layer 2
+            </h3>
+
+            <p>
+                Intermediate acoustic representation.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                48
+            </div>
+
+            <h3>
+                Conv Layer 3
+            </h3>
+
+            <p>
+                Higher-level voice pattern extraction.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ◎
+            </div>
+
+            <h3>
+                Global Average Pooling
+            </h3>
+
+            <p>
+                Compact representation before
+                the dense classification stage.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                4
+            </div>
+
+            <h3>
+                Output Classes
+            </h3>
+
+            <p>
+                C0 Wake, C1 Other Speech,
+                C2 Similar Words, C3 Noise.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     ARCHITECTURE
+     ========================================================= -->
+
+<section
+    class="page"
+    id="page-architecture">
+
+<div class="inner-page">
+
+    <div class="inner-eyebrow">
+        EDGE INTELLIGENCE PIPELINE
+    </div>
+
+    <div class="inner-title">
+        Architecture
+    </div>
+
+    <p class="inner-description">
+        TRONIX follows a local-first voice processing
+        architecture with event-driven communication.
+    </p>
+
+
+    <div
+        class="dashboard-lower"
+        style="margin-top:28px;">
+
+
+        <div
+            class="lower-panel"
+            style="min-height:320px;">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="panel-title">
+                        SIGNAL PATH
+                    </div>
+
+                    <div class="panel-subtitle">
+                        Audio → features → decision
+                    </div>
+
+                </div>
+
+                <div class="panel-badge">
+                    EDGE FIRST
+                </div>
+
+            </div>
+
+
+            <div class="pipeline">
+
+                <div class="pipeline-node">
+
+                    <div class="pipeline-icon">
+                        🎙
+                    </div>
+
+                    <h3>
+                        INMP441
+                    </h3>
+
+                    <p>
+                        16 kHz
+                    </p>
+
+                </div>
+
+
+                <div class="pipeline-line"></div>
+
+
+                <div class="pipeline-node">
+
+                    <div class="pipeline-icon">
+                        ⚡
+                    </div>
+
+                    <h3>
+                        ESP32
+                    </h3>
+
+                    <p>
+                        Capture
+                    </p>
+
+                </div>
+
+
+                <div class="pipeline-line"></div>
+
+
+                <div class="pipeline-node">
+
+                    <div class="pipeline-icon">
+                        ≋
+                    </div>
+
+                    <h3>
+                        MFCC
+                    </h3>
+
+                    <p>
+                        13 × 94
+                    </p>
+
+                </div>
+
+
+                <div class="pipeline-line"></div>
+
+
+                <div class="pipeline-node">
+
+                    <div class="pipeline-icon">
+                        ◆
+                    </div>
+
+                    <h3>
+                        TinyML
+                    </h3>
+
+                    <p>
+                        Decision
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-row">
+
+                    <span>
+                        Wake Word
+                    </span>
+
+                    <strong>
+                        Hey Leo
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Audio
+                    </span>
+
+                    <strong>
+                        Mono PCM
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Model
+                    </span>
+
+                    <strong>
+                        INT8 CNN
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="lower-panel"
+            style="min-height:320px;">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="panel-title">
+                        EVENT PATH
+                    </div>
+
+                    <div class="panel-subtitle">
+                        Communication after wake detection
+                    </div>
+
+                </div>
+
+                <div class="panel-badge">
+                    EVENT
+                </div>
+
+            </div>
+
+
+            <div
+                style="
+                    margin-top:30px;
+                    width:58px;
+                    height:58px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border:1px solid #304965;
+                    border-radius:14px;
+                    background:#132233;
+                    color:#91baf1;
+                    font-size:22px;
+                ">
+
+                ☁
+
+            </div>
+
+
+            <div
+                style="
+                    margin-top:15px;
+                    color:#e7eef6;
+                    font-size:17px;
+                    font-weight:900;
+                ">
+
+                Wake Event
+
+            </div>
+
+
+            <p
+                style="
+                    color:#687b91;
+                    font-size:10px;
+                    line-height:1.7;
+                ">
+
+                A valid wake-word detection creates
+                an event for backend logging.
+
+            </p>
+
+
+            <div class="info-box">
+
+                <div class="info-row">
+
+                    <span>
+                        Trigger
+                    </span>
+
+                    <strong>
+                        C0 / Hey Leo
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Device
+                    </span>
+
+                    <strong>
+                        ESP32
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Storage
+                    </span>
+
+                    <strong>
+                        Firebase / Local
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     COMPLIANCE
+     ========================================================= -->
+
+<section
+    class="page"
+    id="page-compliance">
+
+<div class="inner-page">
+
+    <div class="inner-eyebrow">
+        SYSTEM REQUIREMENTS
+    </div>
+
+    <div class="inner-title">
+        Compliance
+    </div>
+
+    <p class="inner-description">
+        Current measurable and demonstrable
+        characteristics of the TRONIX MVP.
+    </p>
+
+
+    <div class="page-stat-grid">
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ✓
+            </div>
+
+            <h3>
+                Edge Processing
+            </h3>
+
+            <p>
+                ESP32-based edge voice processing
+                architecture.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                8
+            </div>
+
+            <h3>
+                INT8 Model
+            </h3>
+
+            <p>
+                Compact quantized model for
+                edge deployment.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ⚡
+            </div>
+
+            <h3>
+                CPU Measurement
+            </h3>
+
+            <p>
+                Last verified idle measurement:
+                0.46%.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ▣
+            </div>
+
+            <h3>
+                Model Footprint
+            </h3>
+
+            <p>
+                34.39 KB INT8 TFLite model.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ◉
+            </div>
+
+            <h3>
+                Custom Keyword
+            </h3>
+
+            <p>
+                Hey Leo custom wake-word
+                classification.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                4
+            </div>
+
+            <h3>
+                Classification
+            </h3>
+
+            <p>
+                Four-class voice classification
+                including environmental noise.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     PRIVACY & SECURITY
+     ========================================================= -->
+
+<section
+    class="page"
+    id="page-privacy">
+
+<div class="inner-page">
+
+    <div class="inner-eyebrow">
+        VOICE DATA PROTECTION
+    </div>
+
+    <div class="inner-title">
+        Privacy &amp; Security
+    </div>
+
+    <p class="inner-description">
+        Local-first processing with event-driven
+        communication.
+    </p>
+
+
+    <div class="page-stat-grid">
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ◉
+            </div>
+
+            <h3>
+                Local First
+            </h3>
+
+            <p>
+                Voice classification is performed
+                locally before event communication.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                🎙
+            </div>
+
+            <h3>
+                Local Audio Processing
+            </h3>
+
+            <p>
+                Continuous voice classification
+                stays within the local processing path.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ☁
+            </div>
+
+            <h3>
+                Event Communication
+            </h3>
+
+            <p>
+                Wake detections can generate
+                backend events.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                🔒
+            </div>
+
+            <h3>
+                Security Roadmap
+            </h3>
+
+            <p>
+                Secure Boot, flash encryption,
+                TLS/mTLS and replay protection
+                are planned future hardening.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ◈
+            </div>
+
+            <h3>
+                Speaker Security
+            </h3>
+
+            <p>
+                Speaker verification and
+                anti-spoofing are planned
+                future enhancements.
+            </p>
+
+        </div>
+
+
+        <div class="page-stat">
+
+            <div class="page-stat-icon">
+                ✓
+            </div>
+
+            <h3>
+                Transparent MVP
+            </h3>
+
+            <p>
+                The dashboard clearly separates
+                current functionality from future
+                security hardening.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<!-- =========================================================
+     TOAST
+     ========================================================= -->
+
+<div
+    class="toast"
+    id="toast">
+</div>
+
+
+    <script>
+
+/* =========================================================
+   TRONIX FRONTEND
+   ========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+
+        const startButton =
+            document.getElementById(
+                "startStopBtn"
+            );
+
+        const startIcon =
+            document.getElementById(
+                "startIcon"
+            );
+
+        const startText =
+            document.getElementById(
+                "startText"
+            );
+
+        const connectionMessage =
+            document.getElementById(
+                "connectionMessage"
+            );
+
+        const radar =
+            document.getElementById(
+                "radar"
+            );
+
+        const radarStatus =
+            document.getElementById(
+                "radarStatus"
+            );
+
+        const systemPill =
+            document.getElementById(
+                "systemPill"
+            );
+
+        const systemPillText =
+            document.getElementById(
+                "systemPillText"
+            );
+
+        const sidebarStatus =
+            document.getElementById(
+                "sidebarStatus"
+            );
+
+        const sidebarDescription =
+            document.getElementById(
+                "sidebarDescription"
+            );
+
+        const breadcrumbPage =
+            document.getElementById(
+                "breadcrumbPage"
+            );
+
+
+        let running = false;
+
+        let busy = false;
+
+
+        /* =================================================
+           TOAST
+           ================================================= */
+
+        function showToast(
+            message
+        ){
+
+            const toast =
+                document.getElementById(
+                    "toast"
+                );
+
+            toast.textContent =
+                message;
+
+            toast.classList.add(
+                "show"
+            );
+
+            setTimeout(
+                () => {
+
+                    toast.classList.remove(
+                        "show"
+                    );
+
+                },
+                2800
+            );
+
+        }
+
+
+        /* =================================================
+           NAVIGATION
+           ================================================= */
+
+        const menuItems =
+            document.querySelectorAll(
+                ".menu-item"
+            );
+
+        const pages =
+            document.querySelectorAll(
+                ".page"
+            );
+
+
+        menuItems.forEach(
+            item => {
+
+                item.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+
+                        const pageName =
+                            item.dataset.page;
+
+
+                        pages.forEach(
+                            page => {
+
+                                page.classList.remove(
+                                    "active"
+                                );
+
+                            }
+                        );
+
+
+                        const selectedPage =
+                            document.getElementById(
+                                "page-" +
+                                pageName
+                            );
+
+
+                        if(
+                            selectedPage
+                        ){
+
+                            selectedPage.classList.add(
+                                "active"
+                            );
+
+                        }
+
+
+                        menuItems.forEach(
+                            menu => {
+
+                                menu.classList.remove(
+                                    "active"
+                                );
+
+                            }
+                        );
+
+
+                        item.classList.add(
+                            "active"
+                        );
+
+
+                        const label =
+                            item.querySelector(
+                                ".menu-text"
+                            );
+
+
+                        if(
+                            label
+                        ){
+
+                            breadcrumbPage.textContent =
+                                label.textContent.trim();
+
+                        }
+
+
+                        window.scrollTo({
+                            top:0,
+                            behavior:"smooth"
+                        });
+
+
+                        if(
+                            pageName ===
+                            "events"
+                        ){
+
+                            loadEvents();
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        /* =================================================
+           RADAR
+           ================================================= */
+
+        function setRadar(
+            state
+        ){
+
+            radar.classList.remove(
+                "listening",
+                "wake"
+            );
+
+
+            if(
+                state ===
+                "LISTENING"
+            ){
+
+                radar.classList.add(
+                    "listening"
+                );
+
+                radarStatus.textContent =
+                    "LISTENING";
+
+            }
+
+            else if(
+                state ===
+                "WAKE DETECTED"
+            ){
+
+                radar.classList.add(
+                    "wake"
+                );
+
+                radarStatus.textContent =
+                    "WAKE DETECTED";
+
+            }
+
+            else if(
+                state ===
+                "CONNECTING"
+            ){
+
+                radarStatus.textContent =
+                    "CONNECTING";
+
+            }
+
+            else{
+
+                radarStatus.textContent =
+                    "STANDBY";
+
+            }
+
+        }
+
+
+        /* =================================================
+           RUNNING UI
+           ================================================= */
+
+        function setRunningUI(){
+
+            running = true;
+
+            startButton.classList.add(
+                "running"
+            );
+
+            startIcon.textContent =
+                "■";
+
+            startText.textContent =
+                "STOP SYSTEM";
+
+            systemPill.classList.add(
+                "running"
+            );
+            systemPill.classList.remove(
+                "offline"
+            );
+
+            systemPillText.textContent =
+                "SYSTEM ACTIVE";
+
+            sidebarStatus.textContent =
+                "SYSTEM ACTIVE";
+
+            sidebarDescription.textContent =
+                "ESP32 is actively listening";
+
+            setRadar(
+                "LISTENING"
+            );
+
+        }
+
+
+        /* =================================================
+           STOPPED UI
+           ================================================= */
+
+        function setStoppedUI(){
+
+            running = false;
+
+            startButton.classList.remove(
+                "running"
+            );
+
+            startIcon.textContent =
+                "▶";
+
+            startText.textContent =
+                "START SYSTEM";
+
+            systemPill.classList.remove(
+                "running"
+            );
+
+            systemPillText.textContent =
+                "SYSTEM READY";
+
+            sidebarStatus.textContent =
+                "SYSTEM READY";
+
+            sidebarDescription.textContent =
+                "Edge device awaiting activation";
+
+            connectionMessage.textContent =
+                "System stopped. Event history is preserved.";
+
+            setRadar(
+                "STANDBY"
+            );
+
+        }
+
+
+        /* =================================================
+           START
+           ================================================= */
+
+        async function startSystem(){
+
+            if(
+                busy
+            ){
+                return;
+            }
+
+            busy = true;
+
+            startButton.disabled =
+                true;
+
+            connectionMessage.textContent =
+                "Connecting to ESP32...";
+
+            systemPillText.textContent =
+                "CONNECTING";
+
+            sidebarStatus.textContent =
+                "CONNECTING";
+
+            setRadar(
+                "CONNECTING"
+            );
+
+
+            try{
+
+                const response =
+                    await fetch(
+                        "/api/start",
+                        {
+                            method:"POST",
+                            headers:{
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            cache:"no-store"
+                        }
+                    );
+
+
+                let data = {};
+
+                try{
+                    data =
+                        await response.json();
+                }
+                catch(e){}
+
+
+                if(
+                    !response.ok
+                ){
+
+                    throw new Error(
+                        data.error ||
+                        data.message ||
+                        "Unable to start TRONIX."
+                    );
+
+                }
+
+
+                showToast(
+                    "TRONIX is connecting to ESP32..."
+                );
+
+            }
+
+            catch(
+                error
+            ){
+
+                console.error(
+                    error
+                );
+
+                setStoppedUI();
+                systemPill.classList.remove(
+                    "offline"
+                );
+
+                systemPillText.textContent =
+                    "ERROR";
+
+                connectionMessage.textContent =
+                    error.message;
+
+                radarStatus.textContent =
+                    "ERROR";
+
+                showToast(
+                    error.message
+                );
+
+            }
+
+            finally{
+
+                busy = false;
+
+                startButton.disabled =
+                    false;
+
+            }
+
+        }
+
+
+        /* =================================================
+           STOP
+           ================================================= */
+
+        async function stopSystem(){
+
+            if(
+                busy
+            ){
+                return;
+            }
+
+            busy = true;
+
+            startButton.disabled =
+                true;
+
+
+            try{
+
+                await fetch(
+                    "/api/stop",
+                    {
+                        method:"POST",
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+                showToast(
+                    "TRONIX stopped. Event history preserved."
+                );
+
+            }
+
+            catch(
+                error
+            ){
+
+                console.error(
+                    error
+                );
+
+                showToast(
+                    "Stop request failed."
+                );
+
+            }
+
+            finally{
+
+                setStoppedUI();
+
+                startButton.disabled =
+                    false;
+
+                busy = false;
+
+            }
+
+        }
+
+
+        startButton.addEventListener(
+            "click",
+            () => {
+
+                if(
+                    running
+                ){
+
+                    stopSystem();
+
+                }
+                else{
+
+                    startSystem();
+
+                }
+
+            }
+        );
+
+/* =================================================
+   STATUS POLLING
+   ================================================= */
+
+async function updateStatus(){
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/status",
+                {
+                    cache:"no-store"
+                }
+            );
+
+
+        if(
+            !response.ok
+        ){
+
+            return;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const state =
+            String(
+                data.state ||
+                ""
+            ).toUpperCase();
+
+
+        /* =================================================
+           OFFLINE
+           ================================================= */
+
+        if(
+            state ===
+            "OFFLINE"
+        ){
+
+            running = false;
+
+            startButton.classList.remove(
+                "running"
+            );
+
+            startIcon.textContent =
+                "▶";
+
+            startText.textContent =
+                "START SYSTEM";
+
+            systemPill.classList.remove(
+                "running"
+            );
+
+            systemPillText.textContent =
+                "SYSTEM OFFLINE";
+
+            sidebarStatus.textContent =
+                "SYSTEM OFFLINE";
+
+            sidebarDescription.textContent =
+                "ESP32 disconnected";
+
+            connectionMessage.textContent =
+                "ESP32 disconnected. System is offline.";
+
+            setRadar(
+                "OFFLINE"
+            );
+
+        }
+
+
+        /* =================================================
+           LISTENING
+           ================================================= */
+
+        else if(
+            state ===
+            "LISTENING"
+        ){
+
+            setRunningUI();
+
+            connectionMessage.textContent =
+                "ESP32 connected. TRONIX is listening.";
+
+        }
+
+
+        /* =================================================
+           WAKE DETECTED
+           ================================================= */
+
+        else if(
+            state ===
+            "WAKE DETECTED"
+        ){
+
+            setRunningUI();
+
+            systemPillText.textContent =
+                "WAKE DETECTED";
+
+            connectionMessage.textContent =
+                "HEY LEO DETECTED";
+
+            setRadar(
+                "WAKE DETECTED"
+            );
+
+        }
+
+
+        /* =================================================
+           CONNECTING
+           ================================================= */
+
+        else if(
+            state ===
+            "CONNECTING"
+        ){
+
+            systemPillText.textContent =
+                "CONNECTING";
+
+            sidebarStatus.textContent =
+                "CONNECTING";
+
+            connectionMessage.textContent =
+                "Connecting to ESP32...";
+
+            setRadar(
+                "CONNECTING"
+            );
+
+        }
+
+
+        /* =================================================
+           ERROR
+           ================================================= */
+
+        else if(
+            state.includes(
+                "ERROR"
+            )
+        ){
+
+            running = false;
+
+            startButton.classList.remove(
+                "running"
+            );
+
+            startIcon.textContent =
+                "▶";
+
+            startText.textContent =
+                "START SYSTEM";
+
+            systemPill.classList.remove(
+                "running"
+            );
+
+            systemPillText.textContent =
+                "ERROR";
+
+            sidebarStatus.textContent =
+                "ERROR";
+
+            connectionMessage.textContent =
+                data.error ||
+                "ESP32 connection error.";
+
+            radarStatus.textContent =
+                "ERROR";
+
+        }
+
+
+        /* =================================================
+           STANDBY
+           ================================================= */
+
+        else if(
+            state ===
+            "STANDBY"
+        ){
+
+            if(
+                !running
+            ){
+
+                setStoppedUI();
+
+            }
+
+        }
+
+
+        /* =================================================
+           UPDATE LIVE DATA
+           ================================================= */
+
+        updateLive(
+            data
+        );
+
+    }
+
+    catch(
+        error
+    ){
+
+        console.debug(
+            "Status:",
+            error.message
+        );
+
+    }
+
+}
+
+
+        /* =================================================
+           LIVE DATA
+           ================================================= */
+
+        function updateLive(
+            data
+        ){
+
+            const state =
+                document.getElementById(
+                    "liveState"
+                );
+
+            const prediction =
+                document.getElementById(
+                    "livePrediction"
+                );
+
+            const confidence =
+                document.getElementById(
+                    "liveConfidence"
+                );
+
+            const rms =
+                document.getElementById(
+                    "liveRms"
+                );
+
+            const latency =
+                document.getElementById(
+                    "liveLatency"
+                );
+
+            const wakeCount =
+                document.getElementById(
+                    "liveWakeCount"
+                );
+
+
+            if(state){
+                state.textContent =
+                    data.state ||
+                    "STANDBY";
+            }
+
+            if(prediction){
+                prediction.textContent =
+                    data.prediction_display ||
+                    data.prediction ||
+                    "—";
+            }
+
+            if(confidence){
+
+                confidence.textContent =
+                    Number(
+                        data.confidence ||
+                        0
+                    ).toFixed(2) +
+                    "%";
+
+            }
+
+            if(rms){
+
+                rms.textContent =
+                    Number(
+                        data.rms ||
+                        0
+                    ).toFixed(2);
+
+            }
+
+            if(latency){
+
+                latency.textContent =
+                    Number(
+                        data.latency_ms ||
+                        0
+                    ).toFixed(2) +
+                    " ms";
+
+            }
+
+            if(wakeCount){
+
+                wakeCount.textContent =
+                    data.wake_count ||
+                    0;
+
+            }
+
+        }
+
+
+        /* =================================================
+           EVENT LOGS — NEWEST FIRST
+           ================================================= */
+
+        async function loadEvents(){
+
+            const body =
+                document.getElementById(
+                    "eventBody"
+                );
+
+            const count =
+                document.getElementById(
+                    "eventCount"
+                );
+
+
+            body.innerHTML = `
+
+                <tr>
+                    <td colspan="8">
+                        Loading event history...
+                    </td>
+                </tr>
+
+            `;
+
+
+            try{
+
+                const response =
+                    await fetch(
+                        "/api/events",
+                        {
+                            cache:"no-store"
+                        }
+                    );
+
+
+                if(
+                    !response.ok
+                ){
+
+                    throw new Error(
+                        "Event API unavailable"
+                    );
+
+                }
+
+
+                const events =
+                    await response.json();
+
+
+                if(
+                    !Array.isArray(events) ||
+                    events.length === 0
+                ){
+
+                    count.textContent =
+                        "0 stored events";
+
+
+                    body.innerHTML = `
+
+                        <tr>
+
+                            <td colspan="8">
+
+                                No wake-word events
+                                recorded yet.
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                    return;
+
+                }
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Sort by actual timestamp.
+                 * This guarantees newest event first
+                 * even if Firebase/local JSON changes
+                 * the original insertion order.
+                 */
+
+                const newestFirst =
+                    [...events].sort(
+                        (
+                            a,
+                            b
+                        ) => {
+
+                            const dateA =
+                                parseEventDate(
+                                    a
+                                );
+
+                            const dateB =
+                                parseEventDate(
+                                    b
+                                );
+
+
+                            return (
+                                dateB -
+                                dateA
+                            );
+
+                        }
+                    );
+
+
+                count.textContent =
+                    events.length +
+                    (
+                        events.length === 1
+                        ? " stored event"
+                        : " stored events"
+                    );
+
+
+                body.innerHTML = "";
+
+
+                newestFirst.forEach(
+                    (
+                        event,
+                        index
+                    ) => {
+
+
+                        const row =
+                            document.createElement(
+                                "tr"
+                            );
+
+
+                        if(
+                            index === 0
+                        ){
+
+                            row.classList.add(
+                                "latest-event"
+                            );
+
+                        }
+
+
+                        const latestBadge =
+                            index === 0
+                            ? `
+                                <span class="latest-badge">
+                                    LATEST
+                                </span>
+                              `
+                            : "";
+
+
+                        row.innerHTML = `
+
+                            <td>
+
+                                ${
+                                    event.timestamp ||
+                                    "—"
+                                }
+
+                                ${latestBadge}
+
+                            </td>
+
+
+                            <td>
+
+                                ${
+                                    event.event ||
+                                    "HEY LEO DETECTED"
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                ${
+                                    event.confidence !== undefined
+                                    ? Number(
+                                        event.confidence
+                                      ).toFixed(2) + "%"
+                                    : "—"
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                ${
+                                    event.rms !== undefined
+                                    ? Number(
+                                        event.rms
+                                      ).toFixed(2)
+                                    : "—"
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                ${
+                                    event.latency_ms !== undefined
+                                    ? Number(
+                                        event.latency_ms
+                                      ).toFixed(2) + " ms"
+                                    : "—"
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                ${
+                                    event.device ||
+                                    "ESP32"
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                ${
+                                    event.model ||
+                                    "TRONIX INT8"
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="event-status">
+
+                                    ${
+                                        event.status ||
+                                        "SUCCESS"
+                                    }
+
+                                </span>
+
+                            </td>
+
+                        `;
+
+
+                        body.appendChild(
+                            row
+                        );
+
+                    }
+                );
+
+
+                /*
+                 * Automatically scroll the event table
+                 * to the TOP so the latest event is visible.
+                 */
+
+                const tableWrap =
+                    document.querySelector(
+                        ".table-wrap"
+                    );
+
+
+                if(
+                    tableWrap
+                ){
+
+                    tableWrap.scrollTop =
+                        0;
+
+                }
+
+            }
+
+            catch(
+                error
+            ){
+
+                console.error(
+                    error
+                );
+
+
+                count.textContent =
+                    "Unable to load events";
+
+
+                body.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            Unable to load event history.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        /* =================================================
+           ROBUST TIMESTAMP PARSER
+           ================================================= */
+
+        function parseEventDate(
+            event
+        ){
+
+            const raw =
+                event.timestamp ||
+                event.created_at ||
+                event.time ||
+                event.date;
+
+
+            if(
+                !raw
+            ){
+
+                return 0;
+
+            }
+
+
+            const timestamp =
+                new Date(
+                    raw
+                ).getTime();
+
+
+            if(
+                !Number.isNaN(
+                    timestamp
+                )
+            ){
+
+                return timestamp;
+
+            }
+
+
+            /*
+             * If the timestamp cannot be parsed,
+             * push it behind properly timestamped
+             * entries.
+             */
+
+            return 0;
+
+        }
+
+
+        /* =================================================
+           REFRESH
+           ================================================= */
+
+        document
+        .getElementById(
+            "refreshEvents"
+        )
+        .addEventListener(
+            "click",
+            loadEvents
+        );
+
+
+        /* =================================================
+           CLEAR
+           ================================================= */
+
+        document
+        .getElementById(
+            "clearEvents"
+        )
+        .addEventListener(
+            "click",
+            async () => {
+
+
+                if(
+                    !confirm(
+                        "Clear all stored TRONIX event logs?"
+                    )
+                ){
+
+                    return;
+
+                }
+
+
+                try{
+
+                    const response =
+                        await fetch(
+                            "/api/logs/clear",
+                            {
+                                method:"POST",
+                                headers:{
+                                    "Content-Type":
+                                        "application/json"
+                                }
+                            }
+                        );
+
+
+                    if(
+                        !response.ok
+                    ){
+
+                        throw new Error(
+                            "Unable to clear logs."
+                        );
+
+                    }
+
+
+                    await loadEvents();
+
+
+                    showToast(
+                        "Event logs cleared."
+                    );
+
+                }
+
+                catch(
+                    error
+                ){
+
+                    console.error(
+                        error
+                    );
+
+                    showToast(
+                        "Could not clear event logs."
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =================================================
+           INITIAL
+           ================================================= */
+
+        setStoppedUI();
+
+        updateStatus();
+
+        setInterval(
+            updateStatus,
+            700
+        );
+
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
